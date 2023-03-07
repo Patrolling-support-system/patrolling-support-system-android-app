@@ -14,10 +14,7 @@
         <activity
             android:name="pl.agh.patrollingsupportsystem.activities.MainActivity"
             android:exported="true" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+
         </activity>
         <activity
             android:name="pl.agh.patrollingsupportsystem.activities.ActionsListActivity"
@@ -30,7 +27,12 @@
             android:exported="false" />
         <activity
             android:name="pl.agh.patrollingsupportsystem.activities.LoginActivity"
-            android:exported="true"/>
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />
