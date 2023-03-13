@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -28,6 +29,7 @@ public class ActionsListActivity extends AppCompatActivity implements RecyclerVi
 
     RecyclerView recyclerView;
     FirebaseFirestore db;
+    FirebaseAuth mAuth;
     ActionListAdapter actionListAdapter;
     ArrayList<ActionGeneral> itemList;
     ArrayList<String> documentList;
@@ -41,6 +43,7 @@ public class ActionsListActivity extends AppCompatActivity implements RecyclerVi
 
         recyclerView = findViewById(R.id.actionList);
         db = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -55,7 +58,7 @@ public class ActionsListActivity extends AppCompatActivity implements RecyclerVi
     }
 
     private void EventChangeListener() {
-        db.collection("ActionList").orderBy("actionName", Query.Direction.ASCENDING)
+        db.collection("ActionList").whereArrayContains("members", mAuth.getCurrentUser().getUid())
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
