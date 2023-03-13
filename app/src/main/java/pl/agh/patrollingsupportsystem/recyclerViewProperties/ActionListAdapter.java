@@ -48,6 +48,11 @@ public class ActionListAdapter extends RecyclerView.Adapter<ActionListAdapter.Ac
     public static class ActionViewHolder extends RecyclerView.ViewHolder{
 
         TextView name, someData;
+
+        public TextView getName() {
+            return name;
+        }
+
         public ActionViewHolder(@NonNull View itemView, RecyclerViewInterface recyclerViewInterface) {
             super(itemView);
 

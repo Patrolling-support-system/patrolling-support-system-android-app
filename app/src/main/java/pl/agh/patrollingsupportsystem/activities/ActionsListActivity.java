@@ -29,7 +29,8 @@ public class ActionsListActivity extends AppCompatActivity implements RecyclerVi
     RecyclerView recyclerView;
     FirebaseFirestore db;
     ActionListAdapter actionListAdapter;
-    ArrayList<ActionGeneral> list;
+    ArrayList<ActionGeneral> itemList;
+    ArrayList<String> documentList;
 
 
 
@@ -43,8 +44,9 @@ public class ActionsListActivity extends AppCompatActivity implements RecyclerVi
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        list = new ArrayList<>();
-        actionListAdapter = new ActionListAdapter(this, list, this);
+        itemList = new ArrayList<>();
+        documentList = new ArrayList<>();
+        actionListAdapter = new ActionListAdapter(this, itemList, this);
         recyclerView.setAdapter(actionListAdapter);
 
         EventChangeListener();
@@ -63,7 +65,8 @@ public class ActionsListActivity extends AppCompatActivity implements RecyclerVi
                         }
                         for (DocumentChange dc: value.getDocumentChanges()){
                             if (dc.getType() == DocumentChange.Type.ADDED){
-                                list.add(dc.getDocument().toObject(ActionGeneral.class));
+                                itemList.add(dc.getDocument().toObject(ActionGeneral.class));
+                                documentList.add(dc.getDocument().getId());
                             }
 
                             actionListAdapter.notifyDataSetChanged();
@@ -75,6 +78,7 @@ public class ActionsListActivity extends AppCompatActivity implements RecyclerVi
     @Override
     public void onItemClick(int position) {
         Intent i = new Intent(ActionsListActivity.this, ActionDetailsActivity.class);
+        i.putExtra("documentId", documentList.get(position));
         startActivity(i);
     }
 }

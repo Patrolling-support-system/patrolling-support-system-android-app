@@ -24,6 +24,9 @@
             android:name="pl.agh.patrollingsupportsystem.activities.UserAccountActivity"
             android:exported="false" />
         <activity
+            android:name="pl.agh.patrollingsupportsystem.activities.ActionDetailsActivity"
+            android:exported="false" />
+        <activity
             android:name="pl.agh.patrollingsupportsystem.activities.MenuActivity"
             android:exported="false" />
         <activity
