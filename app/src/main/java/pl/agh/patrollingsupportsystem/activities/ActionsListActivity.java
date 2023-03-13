@@ -5,8 +5,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.EventListener;
@@ -20,8 +22,9 @@ import java.util.ArrayList;
 import pl.agh.patrollingsupportsystem.R;
 import pl.agh.patrollingsupportsystem.recyclerViewProperties.ActionGeneral;
 import pl.agh.patrollingsupportsystem.recyclerViewProperties.ActionListAdapter;
+import pl.agh.patrollingsupportsystem.recyclerViewProperties.RecyclerViewInterface;
 
-public class ActionsListActivity extends AppCompatActivity {
+public class ActionsListActivity extends AppCompatActivity implements RecyclerViewInterface {
 
     RecyclerView recyclerView;
     FirebaseFirestore db;
@@ -41,7 +44,7 @@ public class ActionsListActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         list = new ArrayList<>();
-        actionListAdapter = new ActionListAdapter(this, list);
+        actionListAdapter = new ActionListAdapter(this, list, this);
         recyclerView.setAdapter(actionListAdapter);
 
         EventChangeListener();
@@ -67,6 +70,12 @@ public class ActionsListActivity extends AppCompatActivity {
                         }
                     }
                 });
+    }
+
+    @Override
+    public void onItemClick(int position) {
+        Intent i = new Intent(ActionsListActivity.this, ActionDetailsActivity.class);
+        startActivity(i);
     }
 }
 
