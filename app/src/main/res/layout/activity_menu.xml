@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/beige"
     tools:context=".activities.MenuActivity">
 
     <Button
@@ -12,6 +13,8 @@
         android:layout_height="48dp"
         android:fontFamily="@font/signika_negative"
         android:text="Actions list"
+        android:textColor="@color/green_800"
+        android:backgroundTint="@color/green_200"
         app:layout_constraintBottom_toTopOf="@+id/myAccountButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.495"
@@ -26,6 +29,8 @@
         android:layout_marginBottom="368dp"
         android:fontFamily="@font/signika_negative"
         android:text="My Account"
+        android:textColor="@color/green_800"
+        android:backgroundTint="@color/green_200"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.495"

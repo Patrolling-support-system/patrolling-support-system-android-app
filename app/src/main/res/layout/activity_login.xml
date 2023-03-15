@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/beige"
     tools:context=".activities.LoginActivity">
 
     <EditText
@@ -13,6 +14,8 @@
         android:layout_marginBottom="12dp"
         android:ems="10"
         android:fontFamily="@font/signika_negative"
+        android:textColor="@color/green_800"
+        android:backgroundTint="@color/green_400"
         android:hint="@string/email_string"
         android:inputType="textEmailAddress"
         android:minHeight="48dp"
@@ -29,6 +32,8 @@
         android:layout_marginBottom="8dp"
         android:ems="10"
         android:fontFamily="@font/signika_negative"
+        android:textColor="@color/green_800"
+        android:backgroundTint="@color/green_400"
         android:hint="@string/password_string"
         android:inputType="textPassword"
         android:minHeight="48dp"
@@ -44,6 +49,8 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="308dp"
         android:fontFamily="@font/signika_negative"
+        android:textColor="@color/green_800"
+        android:backgroundTint="@color/green_200"
         android:text="Login"
         app:cornerRadius="30dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -58,6 +65,7 @@
         android:layout_height="wrap_content"
         android:fontFamily="@font/signika_negative"
         android:text="Sign in"
+        android:textColor="@color/green_800"
         android:textSize="35sp"
         app:layout_constraintBottom_toTopOf="@+id/editTextEmailAddress"
         app:layout_constraintEnd_toEndOf="parent"
