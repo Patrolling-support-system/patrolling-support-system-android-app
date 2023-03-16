@@ -5,9 +5,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -20,13 +23,16 @@ import java.util.ArrayList;
 import pl.agh.patrollingsupportsystem.R;
 import pl.agh.patrollingsupportsystem.recyclerViewProperties.ActionGeneral;
 import pl.agh.patrollingsupportsystem.recyclerViewProperties.ActionListAdapter;
+import pl.agh.patrollingsupportsystem.recyclerViewProperties.RecyclerViewInterface;
 
-public class ActionsListActivity extends AppCompatActivity {
+public class ActionsListActivity extends AppCompatActivity implements RecyclerViewInterface {
 
     RecyclerView recyclerView;
     FirebaseFirestore db;
+    FirebaseAuth mAuth;
     ActionListAdapter actionListAdapter;
-    ArrayList<ActionGeneral> list;
+    ArrayList<ActionGeneral> itemList;
+    ArrayList<String> documentList;
 
 
 
@@ -37,11 +43,13 @@ public class ActionsListActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.actionList);
         db = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        list = new ArrayList<>();
-        actionListAdapter = new ActionListAdapter(this, list);
+        itemList = new ArrayList<>();
+        documentList = new ArrayList<>();
+        actionListAdapter = new ActionListAdapter(this, itemList, this);
         recyclerView.setAdapter(actionListAdapter);
 
         EventChangeListener();
@@ -50,7 +58,7 @@ public class ActionsListActivity extends AppCompatActivity {
     }
 
     private void EventChangeListener() {
-        db.collection("ActionList").orderBy("actionName", Query.Direction.ASCENDING)
+        db.collection("ActionList").whereArrayContains("members", mAuth.getCurrentUser().getUid())
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
@@ -60,13 +68,21 @@ public class ActionsListActivity extends AppCompatActivity {
                         }
                         for (DocumentChange dc: value.getDocumentChanges()){
                             if (dc.getType() == DocumentChange.Type.ADDED){
-                                list.add(dc.getDocument().toObject(ActionGeneral.class));
+                                itemList.add(dc.getDocument().toObject(ActionGeneral.class));
+                                documentList.add(dc.getDocument().getId());
                             }
 
                             actionListAdapter.notifyDataSetChanged();
                         }
                     }
                 });
+    }
+
+    @Override
+    public void onItemClick(int position) {
+        Intent i = new Intent(ActionsListActivity.this, ActionDetailsActivity.class);
+        i.putExtra("documentId", documentList.get(position));
+        startActivity(i);
     }
 }
 
