@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:backgroundTint="@color/green_200"
     app:cardElevation="8dp"
     app:cardCornerRadius="8dp"
     android:layout_margin="16dp">
@@ -11,7 +13,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -22,18 +26,21 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/signika_negative"
                 android:text="Action name:"
-                android:textColor="@color/black"
+                android:textColor="@color/green_800"
                 android:textSize="26sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tvActionName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="8dp"
+                android:fontFamily="@font/signika_negative"
+                android:textColorHint="@color/green_800"
                 android:text="name"
-                android:textColor="@color/black"
+                android:textColor="@color/green_800"
                 android:textSize="20sp" />
         </LinearLayout>
 
@@ -46,18 +53,22 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/signika_negative"
+                android:textColorHint="@color/green_800"
                 android:text="Somedata:"
-                android:textColor="@color/black"
+                android:textColor="@color/green_800"
                 android:textSize="26sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tvSomeData"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="8dp"
+                android:fontFamily="@font/signika_negative"
+                android:textColorHint="@color/green_800"
                 android:text="name"
-                android:textColor="@color/black"
+                android:textColor="@color/green_800"
                 android:textSize="20sp" />
         </LinearLayout>
     </LinearLayout>
