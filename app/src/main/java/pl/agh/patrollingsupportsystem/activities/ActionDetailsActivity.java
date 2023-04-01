@@ -6,8 +6,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
+import android.view.View;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -22,6 +22,7 @@ public class ActionDetailsActivity extends AppCompatActivity {
 
     FirebaseFirestore db;
     TextView locationData;
+    Button addReportButton;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -35,6 +36,7 @@ public class ActionDetailsActivity extends AppCompatActivity {
 
         locationData = findViewById(R.id.locationData);
         db = FirebaseFirestore.getInstance();
+        addReportButton = findViewById(R.id.addReportButton);
 
         Bundle documentExtras = getIntent().getExtras();
         String documentId = null;
@@ -59,6 +61,10 @@ public class ActionDetailsActivity extends AppCompatActivity {
                         }
                     }
                 });
+
+        addReportButton.setOnClickListener(v -> {
+            startActivity(new Intent(ActionDetailsActivity.this, ReportForLocationActivity.class));
+        });
 
 
     }

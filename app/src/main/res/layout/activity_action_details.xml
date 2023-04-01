@@ -7,6 +7,21 @@
     android:background="@color/beige"
     tools:context=".activities.ActionDetailsActivity">
 
+    <Button
+        android:id="@+id/addReportButton"
+        android:layout_width="300dp"
+        android:layout_height="53dp"
+        android:backgroundTint="@color/green_200"
+        android:fontFamily="@font/signika_negative"
+        android:text="Add report for current location"
+        android:textColor="@color/green_800"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.859" />
+
     <TextView
         android:id="@+id/locationData"
         android:layout_width="wrap_content"
