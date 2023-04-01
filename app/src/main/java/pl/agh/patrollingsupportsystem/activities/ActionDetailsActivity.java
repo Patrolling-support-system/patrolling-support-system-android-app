@@ -7,6 +7,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
+import android.view.View;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -28,6 +29,10 @@ public class ActionDetailsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_action_details);
+
+        Button btnMap = (Button)findViewById(R.id.mapButton);
+
+        btnMap.setOnClickListener(v -> startActivity(new Intent(ActionDetailsActivity.this, MapsActivityCurrentPlace.class)));
 
         locationData = findViewById(R.id.locationData);
         db = FirebaseFirestore.getInstance();
