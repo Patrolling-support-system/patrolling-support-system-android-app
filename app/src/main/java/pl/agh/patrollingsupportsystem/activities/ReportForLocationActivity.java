@@ -9,10 +9,12 @@ import androidx.core.content.FileProvider;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -50,6 +52,11 @@ public class ReportForLocationActivity extends AppCompatActivity {
     ActivityResultLauncher<Uri> mTakePictureLauncher;
 
     StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+
+    //Audio
+    MediaRecorder recorder;
+    boolean isRecording = false;
+    boolean isPaused = false;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -139,6 +146,61 @@ public class ReportForLocationActivity extends AppCompatActivity {
             }
         });
 
+        //Audio recording
+
+
+        Button recordButton = findViewById(R.id.startPauzeRecButton);
+        recordButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!isRecording) {
+                    // Start recording
+                    recorder = new MediaRecorder();
+                    recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+                    recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+                    recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+                    recorder.setOutputFile(getExternalCacheDir().getAbsolutePath() + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) +  "test.mp4");
+                    System.out.println(Environment.getExternalStorageDirectory() + File.separator
+                            + Environment.DIRECTORY_DCIM + File.separator + "FILE_NAME");
+
+                    try {
+                        recorder.prepare();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    recorder.start();
+                    isRecording = true;
+                    isPaused = false;
+                    recordButton.setText("Pauza");
+                } else if (isRecording && !isPaused) {
+                    // Pause recording
+                    recorder.pause();
+                    isPaused = true;
+                    recordButton.setText("Wznów");
+                } else if (isRecording && isPaused) {
+                    // Resume recording
+                    recorder.resume();
+                    isPaused = false;
+                    recordButton.setText("Pauza");
+                }
+            }
+        });
+
+        Button stopButton = findViewById(R.id.stopRec);
+        stopButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isRecording) {
+                    // Stop recording
+                    recorder.stop();
+                    recorder.release();
+                    isRecording = false;
+                    isPaused = false;
+                    recordButton.setText("Nagraj");
+                }
+            }
+        });
 
     }
 
