@@ -6,13 +6,17 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -20,6 +24,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.google.android.datatransport.BuildConfig;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
@@ -35,10 +40,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-import pl.agh.patrollingsupportsystem.BuildConfig;
+//import pl.agh.patrollingsupportsystem.BuildConfig;
 import pl.agh.patrollingsupportsystem.R;
+import pl.agh.patrollingsupportsystem.audioRecRecyclerViewProperties.AudioRecordingGeneral;
+import pl.agh.patrollingsupportsystem.audioRecRecyclerViewProperties.AudioRecordingListAdapter;
+import pl.agh.patrollingsupportsystem.audioRecRecyclerViewProperties.RecyclerViewInterface;
 
-public class ReportForLocationActivity extends AppCompatActivity {
+public class ReportForLocationActivity extends AppCompatActivity implements RecyclerViewInterface {
 
     Button addImagesButton, takePictureButton, sendImagesButton;
     LinearLayout galleryLinearLayout;
@@ -51,6 +59,17 @@ public class ReportForLocationActivity extends AppCompatActivity {
 
     StorageReference storageRef = FirebaseStorage.getInstance().getReference();
 
+    //Audio
+    MediaRecorder recorder;
+    boolean isRecording = false;
+    boolean isPaused = false;
+
+    //rv
+    RecyclerView rvAudioRecordingList;
+    ArrayList<AudioRecordingGeneral> audioRecordingItemList;
+    AudioRecordingListAdapter audioRecordingListAdapter;
+    ArrayList<AudioRecordingGeneral> audioRecordingFiles = new ArrayList<>();
+
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +80,14 @@ public class ReportForLocationActivity extends AppCompatActivity {
         sendImagesButton = findViewById(R.id.sendImagesButton);
         takePictureButton = findViewById(R.id.takePictureButton);
         galleryLinearLayout = findViewById(R.id.galleryLinearLayout);
+
+        //RecycleView
+        audioRecordingItemList = new ArrayList<>();
+        audioRecordingListAdapter = new AudioRecordingListAdapter(this, audioRecordingItemList, this);
+        rvAudioRecordingList = findViewById(R.id.rvAudioRecordingList);
+        rvAudioRecordingList.setHasFixedSize(true);
+        rvAudioRecordingList.setAdapter(audioRecordingListAdapter);
+        rvAudioRecordingList.setLayoutManager(new LinearLayoutManager(this));
 
         //Photo from memory
         mChoosePhoto = registerForActivityResult(
@@ -139,7 +166,72 @@ public class ReportForLocationActivity extends AppCompatActivity {
             }
         });
 
+        //Audio recording
 
+
+        Button recordButton = findViewById(R.id.startPauzeRecButton);
+        recordButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!isRecording) {
+                    // Start recording
+                    recorder = new MediaRecorder();
+                    recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+                    recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+                    recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+                    String fileNameStr = (new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) +  "test.mp4");
+                    AudioRecordingGeneral fileName = new AudioRecordingGeneral();
+                    fileName.setFileName(fileNameStr);
+                    audioRecordingFiles.add(fileName);
+                    recorder.setOutputFile(getExternalCacheDir().getAbsolutePath() + fileName);
+                    System.out.println(Environment.getExternalStorageDirectory() + File.separator
+                            + Environment.DIRECTORY_DCIM + File.separator + "FILE_NAME");
+
+                    try {
+                        recorder.prepare();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    recorder.start();
+                    isRecording = true;
+                    isPaused = false;
+                    recordButton.setText("Pauza");
+                } else if (isRecording && !isPaused) {
+                    // Pause recording
+                    recorder.pause();
+                    isPaused = true;
+                    recordButton.setText("Wznów");
+                } else if (isRecording && isPaused) {
+                    // Resume recording
+                    recorder.resume();
+                    isPaused = false;
+                    recordButton.setText("Pauza");
+                }
+            }
+        });
+
+        Button stopButton = findViewById(R.id.stopRec);
+        stopButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isRecording) {
+                    // Stop recording
+                    recorder.stop();
+                    recorder.release();
+                    isRecording = false;
+                    isPaused = false;
+                    recordButton.setText("Nagraj");
+                    EventChangeListener();
+                }
+            }
+        });
+
+    }
+
+    private void EventChangeListener() {
+        audioRecordingFiles.forEach(file -> audioRecordingItemList.add(file));
+        audioRecordingListAdapter.notifyDataSetChanged();
     }
 
     //Take picture
@@ -179,5 +271,10 @@ public class ReportForLocationActivity extends AppCompatActivity {
         // Save a file: path for use with ACTION_VIEW intents
         String currentPhotoPath = image.getAbsolutePath();
         return image;
+    }
+
+    @Override
+    public void onItemClick(int position) {
+
     }
 }
