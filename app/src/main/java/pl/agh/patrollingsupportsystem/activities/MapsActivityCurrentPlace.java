@@ -1,20 +1,17 @@
 package pl.agh.patrollingsupportsystem.activities;
 
-import android.content.DialogInterface;
+import static android.content.ContentValues.TAG;
+
+import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.FrameLayout;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -25,6 +22,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -33,26 +31,40 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
 import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.model.PlaceLikelihood;
-import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
-import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import pl.agh.patrollingsupportsystem.BuildConfig;
 import pl.agh.patrollingsupportsystem.R;
+import pl.agh.patrollingsupportsystem.recyclerViewProperties.ActionGeneral;
 
 public class MapsActivityCurrentPlace extends AppCompatActivity
-        implements OnMapReadyCallback {
+        implements OnMapReadyCallback, ActivityCompat.OnRequestPermissionsResultCallback {
 
     private static final String TAG = MapsActivityCurrentPlace.class.getSimpleName();
     private GoogleMap map;
     private CameraPosition cameraPosition;
     private PlacesClient placesClient;
     private FusedLocationProviderClient fusedLocationProviderClient;
+    private FirebaseFirestore db;
 
     // A default location (Poland, Cracow) and default zoom to use when location permission is
     // not granted.
@@ -63,6 +75,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
     private Location lastKnownLocation;
     private static final String KEY_CAMERA_POSITION = "camera_position";
     private static final String KEY_LOCATION = "location";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,17 +92,20 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         placesClient = Places.createClient(this);
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
-
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
+
+        db = FirebaseFirestore.getInstance();
+
         mapFragment.getMapAsync(this);
+
     }
 
     /**
      * Saves the state of the map when the activity is paused.
      */
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         if (map != null) {
             outState.putParcelable(KEY_CAMERA_POSITION, map.getCameraPosition());
             outState.putParcelable(KEY_LOCATION, lastKnownLocation);
@@ -97,28 +113,33 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         super.onSaveInstanceState(outState);
     }
 
+    @SuppressLint("MissingPermission")
     @Override
-    public void onMapReady(GoogleMap map) {
+    public void onMapReady(@NonNull GoogleMap map) {
         this.map = map;
-        this.map.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
 
-            @Nullable
+        // for now we get checkpoints from same task, need change
+        CollectionReference collectionRef = db.collection("Tasks");
+        Query query = collectionRef.whereEqualTo("location", "Stóg siana");
+        query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
-            public View getInfoContents(@NonNull Marker marker) {
-                return null;
-            }
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    for (QueryDocumentSnapshot document : task.getResult()) {
 
-            @Override
-            public View getInfoWindow(Marker arg0) {
-                return null;
+                        List<GeoPoint> list = (List<GeoPoint>) document.get("checkpoints");
+                        IntStream.range(0, list.size()).forEach(index-> {
+                            map.addMarker(new MarkerOptions()
+                                .position(new LatLng(list.get(index).getLatitude(), list.get(index).getLongitude()))
+                                .alpha(0.9F)
+                                .title(String.valueOf(index))
+                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))).showInfoWindow();
+                                });
+                    }
+                } else {
+                    Log.d(TAG, "Error getting user document: ", task.getException());
+                }
             }
-
-//            @Override
-//            public View getInfoContents(Marker marker) {
-//                View infoWindow = getLayoutInflater().inflate(R.layout.custom_info_contents,
-//                        (FrameLayout) findViewById(R.id.map), false);
-//                return infoWindow;
-//            }
         });
 
         getLocationPermission();
@@ -126,6 +147,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         getDeviceLocation();
     }
 
+    @SuppressLint("MissingPermission")
     private void getDeviceLocation() {
         try {
             if (locationPermissionGranted) {
@@ -155,6 +177,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         }
     }
 
+    @SuppressLint("MissingPermission")
     private void getLocationPermission() {
         if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
@@ -167,15 +190,14 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         }
     }
 
+    @SuppressLint("MissingPermission")
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         locationPermissionGranted = false;
-        if (requestCode
-                == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
-            if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 locationPermissionGranted = true;
             }
         } else {
