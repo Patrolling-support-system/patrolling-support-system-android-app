@@ -1,5 +1,7 @@
 package pl.agh.patrollingsupportsystem.activities;
 
+import static android.content.ContentValues.TAG;
+
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -16,9 +18,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -27,6 +31,9 @@ import com.bumptech.glide.Glide;
 import com.google.android.datatransport.BuildConfig;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -36,7 +43,9 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -48,7 +57,8 @@ import pl.agh.patrollingsupportsystem.audioRecRecyclerViewProperties.RecyclerVie
 
 public class ReportForLocationActivity extends AppCompatActivity implements RecyclerViewInterface {
 
-    Button addImagesButton, takePictureButton, sendImagesButton;
+    Button addImagesButton, takePictureButton, sendImagesButton, sendTextNote;
+    EditText noteField;
     LinearLayout galleryLinearLayout;
 
     ActivityResultLauncher<String> mChoosePhoto;
@@ -58,6 +68,8 @@ public class ReportForLocationActivity extends AppCompatActivity implements Recy
     ActivityResultLauncher<Uri> mTakePictureLauncher;
 
     StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+
+    private FirebaseFirestore db;
 
     //Audio
     MediaRecorder recorder;
@@ -75,10 +87,13 @@ public class ReportForLocationActivity extends AppCompatActivity implements Recy
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report_for_location);
+        db = FirebaseFirestore.getInstance();
 
         addImagesButton = findViewById(R.id.addImagesButton);
         sendImagesButton = findViewById(R.id.sendImagesButton);
         takePictureButton = findViewById(R.id.takePictureButton);
+        noteField = findViewById(R.id.textNote);
+        sendTextNote = findViewById(R.id.sendTextNote);
         galleryLinearLayout = findViewById(R.id.galleryLinearLayout);
 
         //RecycleView
@@ -225,6 +240,35 @@ public class ReportForLocationActivity extends AppCompatActivity implements Recy
                     EventChangeListener();
                 }
             }
+        });
+
+        // text note
+
+
+        sendTextNote.setOnClickListener(v -> {
+            String note = noteField.getText().toString();
+
+            // creating report with text note
+            // after changing actionList to Tasks change to current checkpoint from db
+
+            Map<String, Object> checkpointReport = new HashMap<>();
+            checkpointReport.put("checkpointNumber", 1);
+            checkpointReport.put("notes", note);
+
+            db.collection("CheckpointReport")
+                    .add(checkpointReport)
+                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                        @Override
+                        public void onSuccess(DocumentReference documentReference) {
+                            Log.d(TAG, "DocumentSnapshot written with ID: " + documentReference.getId());
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w(TAG, "Error adding document", e);
+                        }
+                    });
         });
 
     }
