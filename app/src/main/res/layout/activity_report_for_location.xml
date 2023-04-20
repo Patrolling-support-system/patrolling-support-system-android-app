@@ -41,6 +41,39 @@
         app:layout_constraintVertical_bias="0.196"
         tools:visibility="visible" />
 
+    <EditText
+        android:id="@+id/textNote"
+        android:layout_width="140dp"
+        android:layout_height="52dp"
+        android:backgroundTint="@color/green_200"
+        android:fontFamily="@font/signika_negative"
+        android:hint="Note"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.14"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rvAudioRecordingList"
+        app:layout_constraintVertical_bias="0.866"
+        tools:visibility="visible" />
+
+    <Button
+        android:id="@+id/sendTextNote"
+        android:layout_width="140dp"
+        android:layout_height="52dp"
+        android:backgroundTint="@color/green_200"
+        android:fontFamily="@font/signika_negative"
+        android:text="Send text note"
+        android:textColor="@color/green_800"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.881"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rvAudioRecordingList"
+        app:layout_constraintVertical_bias="0.866"
+        tools:visibility="visible" />
+
     <Button
         android:id="@+id/takePictureButton"
         android:layout_width="140dp"
