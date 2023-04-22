@@ -8,6 +8,11 @@ android {
     namespace 'pl.agh.patrollingsupportsystem'
     compileSdk 33
 
+    buildFeatures {
+        dataBinding true
+        viewBinding true
+    }
+
     defaultConfig {
         applicationId "pl.agh.patrollingsupportsystem"
         minSdk 28

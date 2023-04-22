@@ -23,6 +23,8 @@ public class ActionDetailsActivity extends AppCompatActivity {
     FirebaseFirestore db;
     TextView locationData;
     Button addReportButton;
+    Button btnCoordinatorChat;
+    String coordinator;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -31,8 +33,18 @@ public class ActionDetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_action_details);
 
         Button btnMap = (Button)findViewById(R.id.mapButton);
+        btnCoordinatorChat = findViewById(R.id.coordinatorChat);
+
 
         btnMap.setOnClickListener(v -> startActivity(new Intent(ActionDetailsActivity.this, MapsActivityCurrentPlace.class)));
+        btnCoordinatorChat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(ActionDetailsActivity.this, ChatActivity.class);
+                i.putExtra("coordinator", coordinator);
+                startActivity(i);
+            }
+        });
 
         locationData = findViewById(R.id.locationData);
         db = FirebaseFirestore.getInstance();
@@ -53,6 +65,7 @@ public class ActionDetailsActivity extends AppCompatActivity {
                             DocumentSnapshot document = task.getResult();
                             if (document.exists()) {
                                 locationData.setText(document.getString("location"));
+                                coordinator = document.getString("coordinator");
                             } else {
                                 // document doesn't exist - Toast?
                             }
