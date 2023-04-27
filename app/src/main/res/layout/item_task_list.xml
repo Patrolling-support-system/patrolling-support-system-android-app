@@ -24,23 +24,23 @@
             android:orientation="horizontal">
 
             <TextView
+                android:id="@+id/TaskNameLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/signika_negative"
-                android:text="Action name:"
+                android:text="Task name:   "
                 android:textColor="@color/green_800"
-                android:textSize="26sp"
+                android:textSize="20sp"
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/tvActionName"
+                android:id="@+id/textViewTaskName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
                 android:fontFamily="@font/signika_negative"
-                android:textColorHint="@color/green_800"
-                android:text="name"
+                android:layout_gravity="end"
                 android:textColor="@color/green_800"
+                android:textColorHint="@color/green_800"
                 android:textSize="20sp" />
         </LinearLayout>
 
@@ -51,25 +51,54 @@
             android:orientation="horizontal">
 
             <TextView
+                android:id="@+id/TaskLocationLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/signika_negative"
-                android:textColorHint="@color/green_800"
-                android:text="Somedata:"
+                android:text="Location:      "
                 android:textColor="@color/green_800"
-                android:textSize="26sp"
+                android:textColorHint="@color/green_800"
+                android:textSize="20sp"
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/tvSomeData"
+                android:id="@+id/textViewTaskLocation"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
                 android:fontFamily="@font/signika_negative"
-                android:textColorHint="@color/green_800"
-                android:text="name"
+                android:layout_gravity="end"
                 android:textColor="@color/green_800"
+                android:textColorHint="@color/green_800"
                 android:textSize="20sp" />
         </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/TaskStartDateLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/signika_negative"
+                android:text="Start date:    "
+                android:textColor="@color/green_800"
+                android:textColorHint="@color/green_800"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textViewTaskStartDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/signika_negative"
+                android:layout_gravity="end"
+                android:textColor="@color/green_800"
+                android:textColorHint="@color/green_800"
+                android:textSize="20sp" />
+        </LinearLayout>
+
     </LinearLayout>
 </androidx.cardview.widget.CardView>

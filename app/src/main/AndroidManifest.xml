@@ -48,13 +48,13 @@
             android:name="pl.agh.patrollingsupportsystem.activities.MainActivity"
             android:exported="true" />
         <activity
-            android:name="pl.agh.patrollingsupportsystem.activities.ActionsListActivity"
+            android:name="pl.agh.patrollingsupportsystem.activities.TaskListActivity"
             android:exported="false" />
         <activity
             android:name="pl.agh.patrollingsupportsystem.activities.AccountDetailsActivity"
             android:exported="false" />
         <activity
-            android:name="pl.agh.patrollingsupportsystem.activities.ActionDetailsActivity"
+            android:name="pl.agh.patrollingsupportsystem.activities.TaskDetailsActivity"
             android:exported="false" />
         <activity
             android:name="pl.agh.patrollingsupportsystem.activities.MenuActivity"

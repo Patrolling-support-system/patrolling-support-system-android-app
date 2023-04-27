@@ -2,9 +2,10 @@ package pl.agh.patrollingsupportsystem.recyclerViewProperties;
 
 import com.google.firebase.Timestamp;
 
-public class ActionGeneral {
+public class TaskModel {
 //Variables and getters for ActionProperties
-    String name, location;
+    String name;
+    String location;
     Timestamp startDate;
 
     public String getName() {

@@ -25,6 +25,6 @@ public class MenuActivity extends AppCompatActivity {
         btnTaskList = findViewById(R.id.buttonTaskList);
 
         btnAccountDetails.setOnClickListener(v -> startActivity(new Intent(MenuActivity.this, AccountDetailsActivity.class)));
-        btnTaskList.setOnClickListener(v -> startActivity(new Intent(MenuActivity.this, ActionsListActivity.class)));
+        btnTaskList.setOnClickListener(v -> startActivity(new Intent(MenuActivity.this, TaskListActivity.class)));
     }
 }
