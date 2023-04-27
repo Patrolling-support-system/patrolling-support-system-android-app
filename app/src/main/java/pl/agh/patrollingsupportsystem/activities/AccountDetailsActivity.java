@@ -24,7 +24,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import pl.agh.patrollingsupportsystem.R;
 
-public class UserAccountActivity extends AppCompatActivity {
+public class AccountDetailsActivity extends AppCompatActivity {
 
     TextView userName, userSurname, userEmailAddress;
     FirebaseFirestore db;
@@ -69,7 +69,7 @@ public class UserAccountActivity extends AppCompatActivity {
         userEmailAddress.setText(userEmailAddressText);
 
         changePasswordButton.setOnClickListener(v ->{
-            startActivity(new Intent(UserAccountActivity.this, ChangePasswordActivity.class));
+            startActivity(new Intent(AccountDetailsActivity.this, ChangePasswordActivity.class));
         });
     }
 }

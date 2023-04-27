@@ -51,7 +51,7 @@
             android:name="pl.agh.patrollingsupportsystem.activities.ActionsListActivity"
             android:exported="false" />
         <activity
-            android:name="pl.agh.patrollingsupportsystem.activities.UserAccountActivity"
+            android:name="pl.agh.patrollingsupportsystem.activities.AccountDetailsActivity"
             android:exported="false" />
         <activity
             android:name="pl.agh.patrollingsupportsystem.activities.ActionDetailsActivity"
