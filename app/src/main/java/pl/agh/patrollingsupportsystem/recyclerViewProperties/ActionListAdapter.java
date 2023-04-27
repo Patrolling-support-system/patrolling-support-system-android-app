@@ -35,8 +35,8 @@ public class ActionListAdapter extends RecyclerView.Adapter<ActionListAdapter.Ac
     @Override
     public void onBindViewHolder(@NonNull ActionViewHolder holder, int position) {
         ActionGeneral actionGeneral= list.get(position);
-        holder.name.setText(actionGeneral.getActionName());
-        holder.someData.setText(actionGeneral.getSomeData());
+        holder.name.setText(actionGeneral.getName());
+        holder.someData.setText(actionGeneral.getLocation());
 
     }
 

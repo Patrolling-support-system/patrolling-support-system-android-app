@@ -58,7 +58,7 @@ public class ActionsListActivity extends AppCompatActivity implements RecyclerVi
     }
 
     private void EventChangeListener() {
-        db.collection("ActionList").whereArrayContains("members", mAuth.getCurrentUser().getUid())
+        db.collection("Tasks").whereArrayContains("patrolParticipants", mAuth.getCurrentUser().getUid())
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {

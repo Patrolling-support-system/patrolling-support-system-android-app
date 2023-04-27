@@ -1,14 +1,21 @@
 package pl.agh.patrollingsupportsystem.recyclerViewProperties;
 
+import com.google.firebase.Timestamp;
+
 public class ActionGeneral {
 //Variables and getters for ActionProperties
-    String actionName, someData;
+    String name, location;
+    Timestamp startDate;
 
-    public String getActionName() {
-        return actionName;
+    public String getName() {
+        return name;
     }
 
-    public String getSomeData() {
-        return someData;
+    public String getLocation() {
+        return location;
+    }
+
+    public Timestamp getStartDate() {
+        return startDate;
     }
 }
