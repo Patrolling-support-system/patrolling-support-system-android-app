@@ -8,30 +8,28 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
 import pl.agh.patrollingsupportsystem.R;
-import pl.agh.patrollingsupportsystem.recyclerViewProperties.ActionGeneral;
-import pl.agh.patrollingsupportsystem.recyclerViewProperties.ActionListAdapter;
+import pl.agh.patrollingsupportsystem.recyclerViewProperties.TaskModel;
+import pl.agh.patrollingsupportsystem.recyclerViewProperties.TaskListAdapter;
 import pl.agh.patrollingsupportsystem.recyclerViewProperties.RecyclerViewInterface;
 
-public class ActionsListActivity extends AppCompatActivity implements RecyclerViewInterface {
+public class TaskListActivity extends AppCompatActivity implements RecyclerViewInterface {
 
     RecyclerView recyclerView;
     FirebaseFirestore db;
     FirebaseAuth mAuth;
-    ActionListAdapter actionListAdapter;
-    ArrayList<ActionGeneral> itemList;
+    TaskListAdapter taskListAdapter;
+    ArrayList<TaskModel> itemList;
     ArrayList<String> documentList;
 
 
@@ -39,9 +37,9 @@ public class ActionsListActivity extends AppCompatActivity implements RecyclerVi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_actions_list);
+        setContentView(R.layout.activity_task_list);
 
-        recyclerView = findViewById(R.id.actionList);
+        recyclerView = findViewById(R.id.recyclerViewTaskList);
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
         recyclerView.setHasFixedSize(true);
@@ -49,8 +47,8 @@ public class ActionsListActivity extends AppCompatActivity implements RecyclerVi
 
         itemList = new ArrayList<>();
         documentList = new ArrayList<>();
-        actionListAdapter = new ActionListAdapter(this, itemList, this);
-        recyclerView.setAdapter(actionListAdapter);
+        taskListAdapter = new TaskListAdapter(this, itemList, this);
+        recyclerView.setAdapter(taskListAdapter);
 
         EventChangeListener();
 
@@ -58,7 +56,7 @@ public class ActionsListActivity extends AppCompatActivity implements RecyclerVi
     }
 
     private void EventChangeListener() {
-        db.collection("ActionList").whereArrayContains("members", mAuth.getCurrentUser().getUid())
+        db.collection("Tasks").whereArrayContains("patrolParticipants", mAuth.getCurrentUser().getUid())
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
@@ -68,11 +66,11 @@ public class ActionsListActivity extends AppCompatActivity implements RecyclerVi
                         }
                         for (DocumentChange dc: value.getDocumentChanges()){
                             if (dc.getType() == DocumentChange.Type.ADDED){
-                                itemList.add(dc.getDocument().toObject(ActionGeneral.class));
+                                itemList.add(dc.getDocument().toObject(TaskModel.class));
                                 documentList.add(dc.getDocument().getId());
                             }
 
-                            actionListAdapter.notifyDataSetChanged();
+                            taskListAdapter.notifyDataSetChanged();
                         }
                     }
                 });
@@ -80,7 +78,7 @@ public class ActionsListActivity extends AppCompatActivity implements RecyclerVi
 
     @Override
     public void onItemClick(int position) {
-        Intent i = new Intent(ActionsListActivity.this, ActionDetailsActivity.class);
+        Intent i = new Intent(TaskListActivity.this, TaskDetailsActivity.class);
         i.putExtra("documentId", documentList.get(position));
         startActivity(i);
     }

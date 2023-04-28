@@ -13,30 +13,31 @@ import java.util.ArrayList;
 
 import pl.agh.patrollingsupportsystem.R;
 
-public class ActionListAdapter extends RecyclerView.Adapter<ActionListAdapter.ActionViewHolder> {
+public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ActionViewHolder> {
     RecyclerViewInterface recyclerViewInterface;
     Context context;
 
-    public ActionListAdapter(Context context, ArrayList<ActionGeneral> list, RecyclerViewInterface recyclerViewInterface) {
+    public TaskListAdapter(Context context, ArrayList<TaskModel> list, RecyclerViewInterface recyclerViewInterface) {
         this.context = context;
         this.list = list;
         this.recyclerViewInterface = recyclerViewInterface;
     }
 
-    ArrayList<ActionGeneral> list;
+    ArrayList<TaskModel> list;
 
     @NonNull
     @Override
     public ActionViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(context).inflate(R.layout.action_list_item, parent, false);
+        View v = LayoutInflater.from(context).inflate(R.layout.item_task_list, parent, false);
         return new ActionViewHolder(v, recyclerViewInterface);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ActionViewHolder holder, int position) {
-        ActionGeneral actionGeneral= list.get(position);
-        holder.name.setText(actionGeneral.getActionName());
-        holder.someData.setText(actionGeneral.getSomeData());
+        TaskModel taskModel = list.get(position);
+        holder.name.setText(taskModel.getName());
+        holder.someData.setText(taskModel.getLocation());
+        holder.startDate.setText(taskModel.getStartDate().toDate().toString());
 
     }
 
@@ -47,7 +48,7 @@ public class ActionListAdapter extends RecyclerView.Adapter<ActionListAdapter.Ac
 
     public static class ActionViewHolder extends RecyclerView.ViewHolder{
 
-        TextView name, someData;
+        TextView name, someData, startDate;
 
         public TextView getName() {
             return name;
@@ -56,8 +57,9 @@ public class ActionListAdapter extends RecyclerView.Adapter<ActionListAdapter.Ac
         public ActionViewHolder(@NonNull View itemView, RecyclerViewInterface recyclerViewInterface) {
             super(itemView);
 
-            name = itemView.findViewById(R.id.tvActionName);
-            someData = itemView.findViewById(R.id.tvSomeData);
+            name = itemView.findViewById(R.id.textViewTaskName);
+            someData = itemView.findViewById(R.id.textViewTaskLocation);
+            startDate = itemView.findViewById(R.id.textViewTaskStartDate);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

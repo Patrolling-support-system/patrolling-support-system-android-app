@@ -5,10 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/beige"
-    tools:context=".activities.UserAccountActivity">
+    tools:context=".activities.AccountDetailsActivity">
 
     <Button
-        android:id="@+id/changePasswordButton"
+        android:id="@+id/buttonChangePassword"
         android:layout_width="300dp"
         android:layout_height="48dp"
         android:backgroundTint="@color/green_200"
@@ -23,23 +23,22 @@
         app:layout_constraintVertical_bias="0.853" />
 
     <TextView
-        android:id="@+id/userEmailAddress"
+        android:id="@+id/textViewEmailAddress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/signika_negative"
-        android:text="TextView"
         android:textAlignment="gravity"
         android:textColor="@color/green_800"
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/userName"
+        app:layout_constraintEnd_toEndOf="@+id/textViewName"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/userName"
-        app:layout_constraintTop_toBottomOf="@+id/userName"
+        app:layout_constraintStart_toStartOf="@+id/textViewName"
+        app:layout_constraintTop_toBottomOf="@+id/textViewName"
         app:layout_constraintVertical_bias="0.067" />
 
     <TextView
-        android:id="@+id/userEmailAddressLabel"
+        android:id="@+id/labelEmailAddress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/signika_negative"
@@ -51,11 +50,11 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.125"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/userSurnameLabel"
+        app:layout_constraintTop_toBottomOf="@+id/labelSurname"
         app:layout_constraintVertical_bias="0.015" />
 
     <TextView
-        android:id="@+id/userNameLabel"
+        android:id="@+id/labelName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/signika_negative"
@@ -71,13 +70,12 @@
         app:layout_constraintVertical_bias="0.079" />
 
     <TextView
-        android:id="@+id/userName"
+        android:id="@+id/textViewName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/signika_negative"
-        android:textColor="@color/green_800"
-        android:text="TextView"
         android:textAlignment="gravity"
+        android:textColor="@color/green_800"
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -87,7 +85,7 @@
         app:layout_constraintVertical_bias="0.079" />
 
     <TextView
-        android:id="@+id/userSurnameLabel"
+        android:id="@+id/labelSurname"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -100,22 +98,21 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.106"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/userNameLabel"
+        app:layout_constraintTop_toBottomOf="@+id/labelName"
         app:layout_constraintVertical_bias="0.0" />
 
     <TextView
-        android:id="@+id/userSurname"
+        android:id="@+id/textViewSurname"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/signika_negative"
-        android:textColor="@color/green_800"
-        android:text="TextView"
         android:textAlignment="gravity"
+        android:textColor="@color/green_800"
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/userName"
+        app:layout_constraintEnd_toEndOf="@+id/textViewName"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/userName"
-        app:layout_constraintTop_toBottomOf="@+id/userName"
+        app:layout_constraintStart_toStartOf="@+id/textViewName"
+        app:layout_constraintTop_toBottomOf="@+id/textViewName"
         app:layout_constraintVertical_bias="0.012" />
 </androidx.constraintlayout.widget.ConstraintLayout>

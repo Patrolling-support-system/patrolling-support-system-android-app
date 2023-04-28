@@ -12,13 +12,12 @@ import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import pl.agh.patrollingsupportsystem.R;
 
-public class ActionDetailsActivity extends AppCompatActivity {
+public class TaskDetailsActivity extends AppCompatActivity {
 
     FirebaseFirestore db;
     TextView locationData;
@@ -30,17 +29,17 @@ public class ActionDetailsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_action_details);
+        setContentView(R.layout.activity_task_details);
 
         Button btnMap = (Button)findViewById(R.id.mapButton);
         btnCoordinatorChat = findViewById(R.id.coordinatorChat);
 
 
-        btnMap.setOnClickListener(v -> startActivity(new Intent(ActionDetailsActivity.this, MapsActivityCurrentPlace.class)));
+        btnMap.setOnClickListener(v -> startActivity(new Intent(TaskDetailsActivity.this, MapsActivityCurrentPlace.class)));
         btnCoordinatorChat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(ActionDetailsActivity.this, ChatActivity.class);
+                Intent i = new Intent(TaskDetailsActivity.this, ChatActivity.class);
                 i.putExtra("coordinator", coordinator);
                 startActivity(i);
             }
@@ -56,7 +55,7 @@ public class ActionDetailsActivity extends AppCompatActivity {
             documentId = documentExtras.getString("documentId");
         }
 
-        db.collection("ActionList").document(documentId)
+        db.collection("Tasks").document(documentId)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
@@ -76,7 +75,7 @@ public class ActionDetailsActivity extends AppCompatActivity {
                 });
 
         addReportButton.setOnClickListener(v -> {
-            startActivity(new Intent(ActionDetailsActivity.this, ReportForLocationActivity.class));
+            startActivity(new Intent(TaskDetailsActivity.this, ReportForLocationActivity.class));
         });
 
 

@@ -1,20 +1,16 @@
 package pl.agh.patrollingsupportsystem.activities;
 
-import static android.content.ContentValues.TAG;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
+import android.text.TextUtils;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
@@ -24,7 +20,11 @@ import pl.agh.patrollingsupportsystem.R;
 
 public class ChangePasswordActivity extends AppCompatActivity {
 
-    EditText oldPassword, newPassword;
+    EditText etOldPassword;
+    EditText etNewPassword;
+    Button btnConfirmChangePassword;
+    FirebaseUser fbUser;
+
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -32,41 +32,43 @@ public class ChangePasswordActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_change_password);
 
-        oldPassword = findViewById(R.id.oldPassword);
-        newPassword = findViewById(R.id.newPassword);
-        Button changePassword = findViewById(R.id.changePassword);
+        //Layout elements
+        etOldPassword = findViewById(R.id.editTextOldPassword);
+        etNewPassword = findViewById(R.id.editTextNewPassword);
+        btnConfirmChangePassword = findViewById(R.id.buttonConfirmChangePassword);
 
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String userEmailAddress = user.getEmail();
+        //Firebase user for instance
+        fbUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        changePassword.setOnClickListener(v -> {
-            AuthCredential credential = EmailAuthProvider
-                    .getCredential(userEmailAddress, String.valueOf(oldPassword.getText()));
+        btnConfirmChangePassword.setOnClickListener(v -> {
+            String newPassword = String.valueOf(etNewPassword.getText());
+            String oldPassword = String.valueOf(etOldPassword.getText());
+            if (TextUtils.isEmpty(oldPassword)) {
+                etOldPassword.setError("Old Password cannot be empty");
+                etOldPassword.requestFocus();
+            } else if (TextUtils.isEmpty(newPassword)) {
+                etNewPassword.setError("New Password cannot be empty");
+                etNewPassword.requestFocus();
+            } else {
+            AuthCredential credential = EmailAuthProvider.getCredential(fbUser.getEmail(), oldPassword);
 
-            user.reauthenticate(credential)
-                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if (task.isSuccessful()) {
-                                user.updatePassword(String.valueOf(newPassword.getText())).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if (task.isSuccessful()) {
-                                            Log.d(TAG, "Password updated");
-                                            //TODO Add Toast
-                                            startActivity(new Intent(ChangePasswordActivity.this, LoginActivity.class));
-                                        } else {
-                                            Log.d(TAG, "Error password not updated");
-                                            //TODO Add Toast
-                                        }
-                                    }
-                                });
-                            } else {
-                                Log.d(TAG, "Error auth failed");
-                                //TODO Add Toast
-                            }
+            //Reauthentication to change password for logged user
+            fbUser.reauthenticate(credential)
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            fbUser.updatePassword(newPassword).addOnCompleteListener(task1 -> {
+                                if (task1.isSuccessful()) {
+                                    Toast.makeText(ChangePasswordActivity.this, "Password updated successfully", Toast.LENGTH_SHORT);
+                                    startActivity(new Intent(ChangePasswordActivity.this, LoginActivity.class));
+                                } else {
+                                    Toast.makeText(ChangePasswordActivity.this, "Password update failed", Toast.LENGTH_LONG);
+                                }
+                            });
+                        } else {
+                            Toast.makeText(ChangePasswordActivity.this, "Authentication error", Toast.LENGTH_LONG);
                         }
                     });
+            }
         });
     }
 }
