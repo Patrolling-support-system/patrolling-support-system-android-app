@@ -48,9 +48,8 @@
                     android:id="@+id/textViewTaskName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/signika_negative"
-                    android:text="test"
                     android:layout_weight="1"
+                    android:fontFamily="@font/signika_negative"
                     android:maxWidth="80dp"
                     android:textColor="@color/green_800"
                     android:textSize="20sp" />
@@ -78,7 +77,7 @@
                     android:layout_weight="1"
                     android:fontFamily="@font/signika_negative"
                     android:maxWidth="30dp"
-                    android:text="Task Description:"
+                    android:text="Task description:"
                     android:textColor="@color/green_800"
                     android:textSize="20sp"
                     android:textStyle="bold" />
@@ -87,9 +86,8 @@
                     android:id="@+id/textViewTaskDescription"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/signika_negative"
-                    android:text="test"
                     android:layout_weight="1"
+                    android:fontFamily="@font/signika_negative"
                     android:maxWidth="80dp"
                     android:textColor="@color/green_800"
                     android:textSize="20sp" />
@@ -126,9 +124,8 @@
                     android:id="@+id/locationData"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/signika_negative"
-                    android:text="test"
                     android:layout_weight="1"
+                    android:fontFamily="@font/signika_negative"
                     android:maxWidth="80dp"
                     android:textColor="@color/green_800"
                     android:textSize="20sp" />
@@ -163,9 +160,8 @@
                     android:id="@+id/textViewStartDate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/signika_negative"
-                    android:text="test"
                     android:layout_weight="1"
+                    android:fontFamily="@font/signika_negative"
                     android:maxWidth="80dp"
                     android:textColor="@color/green_800"
                     android:textSize="20sp" />
@@ -200,9 +196,8 @@
                     android:id="@+id/textViewEndDate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/signika_negative"
-                    android:text="test"
                     android:layout_weight="1"
+                    android:fontFamily="@font/signika_negative"
                     android:maxWidth="80dp"
                     android:textColor="@color/green_800"
                     android:textSize="20sp" />
