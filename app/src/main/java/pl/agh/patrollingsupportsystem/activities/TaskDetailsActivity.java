@@ -20,7 +20,7 @@ import pl.agh.patrollingsupportsystem.R;
 public class TaskDetailsActivity extends AppCompatActivity {
 
     FirebaseFirestore db;
-    TextView locationData;
+    TextView locationData, tvTaskName, tvTaskDescription, tvStartDate, tvEndDate;
     Button addReportButton;
     Button btnCoordinatorChat;
     String coordinator;
@@ -30,6 +30,11 @@ public class TaskDetailsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task_details);
+
+        tvTaskName = findViewById(R.id.textViewTaskName);
+        tvTaskDescription = findViewById(R.id.textViewTaskDescription);
+        tvStartDate = findViewById(R.id.textViewStartDate);
+        tvEndDate = findViewById(R.id.textViewEndDate);
 
         Button btnMap = (Button)findViewById(R.id.mapButton);
         btnCoordinatorChat = findViewById(R.id.coordinatorChat);
@@ -57,20 +62,21 @@ public class TaskDetailsActivity extends AppCompatActivity {
 
         db.collection("Tasks").document(documentId)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            DocumentSnapshot document = task.getResult();
-                            if (document.exists()) {
-                                locationData.setText(document.getString("location"));
-                                coordinator = document.getString("coordinator");
-                            } else {
-                                // document doesn't exist - Toast?
-                            }
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            locationData.setText(document.getString("location"));
+                            coordinator = document.getString("coordinator");
+                            tvTaskName.setText(document.getString("name"));
+                            tvTaskDescription.setText(document.getString("taskDescription"));
+                            tvStartDate.setText(document.getDate("startDate").toString());
+                            tvEndDate.setText(document.getDate("endDate").toString());
                         } else {
-                            // document downloading error - Toast?
+                            // document doesn't exist - Toast?
                         }
+                    } else {
+                        // document downloading error - Toast?
                     }
                 });
 
