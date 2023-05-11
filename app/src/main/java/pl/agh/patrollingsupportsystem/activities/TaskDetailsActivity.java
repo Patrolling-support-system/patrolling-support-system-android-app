@@ -1,7 +1,10 @@
 package pl.agh.patrollingsupportsystem.activities;
 
 import androidx.annotation.NonNull;
+import com.google.firebase.firestore.FieldValue;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -11,11 +14,21 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import pl.agh.patrollingsupportsystem.R;
+import pl.agh.patrollingsupportsystem.checkpointsRecyclerViewProperties.CheckpointAdapter;
+import pl.agh.patrollingsupportsystem.models.TaskCheckpoints;
 
 public class TaskDetailsActivity extends AppCompatActivity {
 
@@ -24,6 +37,11 @@ public class TaskDetailsActivity extends AppCompatActivity {
     Button addReportButton;
     Button btnCoordinatorChat;
     String coordinator;
+
+    //Checkpoints
+    RecyclerView rvCheckpointList;
+    CheckpointAdapter checkpointAdapter;
+    List<GeoPoint> checkpoints;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -84,6 +102,39 @@ public class TaskDetailsActivity extends AppCompatActivity {
             startActivity(new Intent(TaskDetailsActivity.this, ReportForLocationActivity.class));
         });
 
+        //RecyclerCheckpointView
+        rvCheckpointList = findViewById(R.id.recyclerViewCheckpointList);
+        checkpoints = new ArrayList<>();
+        checkpointAdapter = new CheckpointAdapter(checkpoints);
+        rvCheckpointList.setAdapter(checkpointAdapter);
+        rvCheckpointList.setLayoutManager(new LinearLayoutManager(this));
+
+        CollectionReference tasksRef = db.collection("Tasks");
+        DocumentReference taskDocRef = tasksRef.document(documentId);
+
+        taskDocRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                if (documentSnapshot.exists()) {
+                    // Pobranie pola checkpoints z dokumentu
+                    List<GeoPoint> checkpointsData = (List<GeoPoint>) documentSnapshot.get("checkpoints");
+
+                    if (checkpointsData != null) {
+                        // Aktualizacja listy checkpoints i powiadomienie adaptera
+                        checkpoints.clear();
+                        checkpoints.addAll(checkpointsData);
+                        checkpointAdapter.notifyDataSetChanged();
+                    }
+                }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                // Obsługa błędu pobierania danych
+            }
+        });
+
 
     }
+
 }
