@@ -28,9 +28,10 @@ import java.util.List;
 
 import pl.agh.patrollingsupportsystem.R;
 import pl.agh.patrollingsupportsystem.checkpointsRecyclerViewProperties.CheckpointAdapter;
+import pl.agh.patrollingsupportsystem.checkpointsRecyclerViewProperties.CheckpointRvInterface;
 import pl.agh.patrollingsupportsystem.models.TaskCheckpoints;
 
-public class TaskDetailsActivity extends AppCompatActivity {
+public class TaskDetailsActivity extends AppCompatActivity implements CheckpointRvInterface {
 
     FirebaseFirestore db;
     TextView locationData, tvTaskName, tvTaskDescription, tvStartDate, tvEndDate;
@@ -105,9 +106,10 @@ public class TaskDetailsActivity extends AppCompatActivity {
         //RecyclerCheckpointView
         rvCheckpointList = findViewById(R.id.recyclerViewCheckpointList);
         checkpoints = new ArrayList<>();
-        checkpointAdapter = new CheckpointAdapter(checkpoints);
+        checkpointAdapter = new CheckpointAdapter(this, checkpoints, this);
         rvCheckpointList.setAdapter(checkpointAdapter);
         rvCheckpointList.setLayoutManager(new LinearLayoutManager(this));
+        rvCheckpointList.setHasFixedSize(true);
 
         CollectionReference tasksRef = db.collection("Tasks");
         DocumentReference taskDocRef = tasksRef.document(documentId);
@@ -137,4 +139,8 @@ public class TaskDetailsActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onItemClick(int position) {
+
+    }
 }
