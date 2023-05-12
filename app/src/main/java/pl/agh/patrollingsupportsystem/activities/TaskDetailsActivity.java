@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -141,6 +142,8 @@ public class TaskDetailsActivity extends AppCompatActivity implements Checkpoint
 
     @Override
     public void onItemClick(int position) {
-
+//        Toast t = Toast.makeText(this, "Test1" + position, Toast.LENGTH_SHORT);
+//        t.show();
+        System.out.println("Test1" + position);
     }
 }

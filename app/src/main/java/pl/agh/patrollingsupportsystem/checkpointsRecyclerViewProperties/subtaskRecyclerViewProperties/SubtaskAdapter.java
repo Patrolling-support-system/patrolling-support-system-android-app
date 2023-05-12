@@ -31,7 +31,7 @@ public class SubtaskAdapter extends RecyclerView.Adapter<SubtaskAdapter.ViewHold
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_subtask_list, parent, false);
-        return new ViewHolder(v);
+        return new ViewHolder(v, checkpointRvInterface);
     }
 
     @Override
@@ -49,9 +49,19 @@ public class SubtaskAdapter extends RecyclerView.Adapter<SubtaskAdapter.ViewHold
     public static class ViewHolder extends RecyclerView.ViewHolder{
         TextView tvSubtaskName;
 
-        public ViewHolder(@NonNull View itemView) {
+        public ViewHolder(@NonNull View itemView, CheckpointRvInterface checkpointRvInterface) {
             super(itemView);
             tvSubtaskName = itemView.findViewById(R.id.textViewSubtaskName);
+
+            itemView.setOnClickListener(view -> {
+                if(checkpointRvInterface != null){
+                    int position = getAdapterPosition();
+
+                    if(position != RecyclerView.NO_POSITION){
+                        checkpointRvInterface.onItemClick(position);
+                    }
+                }
+            });
         }
     }
 }
