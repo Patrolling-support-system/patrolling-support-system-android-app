@@ -16,14 +16,13 @@ import pl.agh.patrollingsupportsystem.R;
 public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ActionViewHolder> {
     RecyclerViewInterface recyclerViewInterface;
     Context context;
+    ArrayList<TaskModel> list;
 
     public TaskListAdapter(Context context, ArrayList<TaskModel> list, RecyclerViewInterface recyclerViewInterface) {
         this.context = context;
         this.list = list;
         this.recyclerViewInterface = recyclerViewInterface;
     }
-
-    ArrayList<TaskModel> list;
 
     @NonNull
     @Override
@@ -61,15 +60,12 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.Action
             someData = itemView.findViewById(R.id.textViewTaskLocation);
             startDate = itemView.findViewById(R.id.textViewTaskStartDate);
 
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if(recyclerViewInterface != null){
-                        int position = getAdapterPosition();
+            itemView.setOnClickListener(view -> {
+                if(recyclerViewInterface != null){
+                    int position = getAdapterPosition();
 
-                        if(position != RecyclerView.NO_POSITION){
-                            recyclerViewInterface.onItemClick(position);
-                        }
+                    if(position != RecyclerView.NO_POSITION){
+                        recyclerViewInterface.onItemClick(position);
                     }
                 }
             });

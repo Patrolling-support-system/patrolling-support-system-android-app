@@ -101,12 +101,6 @@ public class ChatActivity extends AppCompatActivity {
     }
 
 
-
-//    private void init() {
-//        //preferenceManager = new PreferenceManager(getApplicationContext());
-//
-//    }
-
     private void listenMessages(){
         database.collection("Chat")
                 .whereEqualTo("senderId", mAuth.getCurrentUser().getUid())

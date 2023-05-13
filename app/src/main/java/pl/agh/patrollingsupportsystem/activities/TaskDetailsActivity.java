@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.widget.Button;
 import android.view.View;
 import android.widget.TextView;
@@ -115,19 +116,16 @@ public class TaskDetailsActivity extends AppCompatActivity implements Checkpoint
         CollectionReference tasksRef = db.collection("Tasks");
         DocumentReference taskDocRef = tasksRef.document(documentId);
 
-        taskDocRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                if (documentSnapshot.exists()) {
-                    // Pobranie pola checkpoints z dokumentu
-                    List<GeoPoint> checkpointsData = (List<GeoPoint>) documentSnapshot.get("checkpoints");
+        taskDocRef.get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                // Pobranie pola checkpoints z dokumentu
+                List<GeoPoint> checkpointsData = (List<GeoPoint>) documentSnapshot.get("checkpoints");
 
-                    if (checkpointsData != null) {
-                        // Aktualizacja listy checkpoints i powiadomienie adaptera
-                        checkpoints.clear();
-                        checkpoints.addAll(checkpointsData);
-                        checkpointAdapter.notifyDataSetChanged();
-                    }
+                if (checkpointsData != null) {
+                    // Aktualizacja listy checkpoints i powiadomienie adaptera
+                    checkpoints.clear();
+                    checkpoints.addAll(checkpointsData);
+                    checkpointAdapter.notifyDataSetChanged();
                 }
             }
         }).addOnFailureListener(new OnFailureListener() {
@@ -142,8 +140,11 @@ public class TaskDetailsActivity extends AppCompatActivity implements Checkpoint
 
     @Override
     public void onItemClick(int position) {
-//        Toast t = Toast.makeText(this, "Test1" + position, Toast.LENGTH_SHORT);
-//        t.show();
-        System.out.println("Test1" + position);
+        Toast t = Toast.makeText(this, checkpoints.get(position).toString(), Toast.LENGTH_SHORT);
+        t.show();
+        Intent i = new Intent(TaskDetailsActivity.this, SubtaskActivity.class);
+        i.putExtra("checkpoint_latitude", checkpoints.get(position).getLatitude());
+        i.putExtra("checkpoint_longitude", checkpoints.get(position).getLongitude());
+        startActivity(i);
     }
 }
