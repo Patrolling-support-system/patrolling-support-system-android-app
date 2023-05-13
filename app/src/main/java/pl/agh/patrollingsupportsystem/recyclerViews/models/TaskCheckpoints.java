@@ -1,4 +1,4 @@
-package pl.agh.patrollingsupportsystem.models;
+package pl.agh.patrollingsupportsystem.recyclerViews.models;
 
 import com.google.firebase.firestore.GeoPoint;
 

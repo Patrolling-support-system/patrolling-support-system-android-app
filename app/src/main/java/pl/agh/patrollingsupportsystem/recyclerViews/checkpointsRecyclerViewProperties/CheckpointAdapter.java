@@ -1,4 +1,4 @@
-package pl.agh.patrollingsupportsystem.checkpointsRecyclerViewProperties;
+package pl.agh.patrollingsupportsystem.recyclerViews.checkpointsRecyclerViewProperties;
 
 import static android.content.ContentValues.TAG;
 
@@ -22,19 +22,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import pl.agh.patrollingsupportsystem.R;
-import pl.agh.patrollingsupportsystem.checkpointsRecyclerViewProperties.nestedSubtaskRecyclerViewProperties.SubtaskAdapter;
-import pl.agh.patrollingsupportsystem.models.SubtaskModel;
+import pl.agh.patrollingsupportsystem.recyclerViews.checkpointsRecyclerViewProperties.nestedSubtaskRecyclerViewProperties.SubtaskAdapter;
+import pl.agh.patrollingsupportsystem.recyclerViews.models.SubtaskModel;
 
 public class CheckpointAdapter extends RecyclerView.Adapter<CheckpointAdapter.ViewHolder>{
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     Context context;
-    CheckpointRvInterface checkpointRvInterface;
+    RecyclerViewInterface recyclerViewInterface;
 
 
-    public CheckpointAdapter(Context context, List<GeoPoint> checkpoints, CheckpointRvInterface checkpointRvInterface) {
+    public CheckpointAdapter(Context context, List<GeoPoint> checkpoints, RecyclerViewInterface recyclerViewInterface) {
         this.context = context;
         this.checkpoints = checkpoints;
-        this.checkpointRvInterface = checkpointRvInterface;
+        this.recyclerViewInterface = recyclerViewInterface;
     }
 
 
@@ -44,7 +44,7 @@ public class CheckpointAdapter extends RecyclerView.Adapter<CheckpointAdapter.Vi
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_checkpoint_list, parent, false);
-        return new ViewHolder(view, checkpointRvInterface);
+        return new ViewHolder(view, recyclerViewInterface);
     }
 
     @Override
@@ -81,29 +81,23 @@ public class CheckpointAdapter extends RecyclerView.Adapter<CheckpointAdapter.Vi
         return checkpoints.size();
     }
 
-//    @Override
-//    public void onItemClick(int position) {
-////        Intent i = new Intent(context, SubtaskActivity.class);
-////        context.startActivity(i);
-//        System.out.println(position);
-//    }
 
     public static class ViewHolder extends RecyclerView.ViewHolder{
 
         TextView textViewCheckpointName;
         RecyclerView rvSubtasks;
 
-        public ViewHolder(@NonNull View itemView, CheckpointRvInterface checkpointRvInterface){
+        public ViewHolder(@NonNull View itemView, RecyclerViewInterface recyclerViewInterface){
             super(itemView);
             textViewCheckpointName = itemView.findViewById(R.id.textViewCheckpointName);
             rvSubtasks = itemView.findViewById(R.id.recyclerViewSubtask);
 
             itemView.setOnClickListener(view -> {
-                if(checkpointRvInterface != null){
+                if(recyclerViewInterface != null){
                     int position = getAdapterPosition();
 
                     if(position != RecyclerView.NO_POSITION){
-                        checkpointRvInterface.onItemClick(position);
+                        recyclerViewInterface.onItemClick(position);
                     }
                 }
             });

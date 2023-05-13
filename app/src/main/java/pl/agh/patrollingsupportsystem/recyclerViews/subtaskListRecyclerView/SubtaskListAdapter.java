@@ -1,4 +1,4 @@
-package pl.agh.patrollingsupportsystem.subtaskListRecyclerView;
+package pl.agh.patrollingsupportsystem.recyclerViews.subtaskListRecyclerView;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -14,27 +14,27 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.List;
 
 import pl.agh.patrollingsupportsystem.R;
-import pl.agh.patrollingsupportsystem.checkpointsRecyclerViewProperties.CheckpointRvInterface;
-import pl.agh.patrollingsupportsystem.models.SubtaskModelExtended;
+import pl.agh.patrollingsupportsystem.recyclerViews.checkpointsRecyclerViewProperties.RecyclerViewInterface;
+import pl.agh.patrollingsupportsystem.recyclerViews.models.SubtaskModelExtended;
 
 public class SubtaskListAdapter extends RecyclerView.Adapter<SubtaskListAdapter.ViewHolder> {
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     Context context;
-    CheckpointRvInterface checkpointRvInterface;
+    RecyclerViewInterface recyclerViewInterface;
     List<SubtaskModelExtended> subtasks;
 
-    public SubtaskListAdapter(Context context, List<SubtaskModelExtended> subtasks, CheckpointRvInterface checkpointRvInterface) {
+    public SubtaskListAdapter(Context context, List<SubtaskModelExtended> subtasks, RecyclerViewInterface recyclerViewInterface) {
         this.context = context;
         this.subtasks = subtasks;
-        this.checkpointRvInterface = checkpointRvInterface;
+        this.recyclerViewInterface = recyclerViewInterface;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_subtask_extended, parent, false);
-        return new SubtaskListAdapter.ViewHolder(view, checkpointRvInterface);
+        return new SubtaskListAdapter.ViewHolder(view, recyclerViewInterface);
     }
 
     @Override
@@ -56,17 +56,17 @@ public class SubtaskListAdapter extends RecyclerView.Adapter<SubtaskListAdapter.
         TextView tvSubtaskName;
         TextView tvSubtaskDescription;
 
-        public ViewHolder(@NonNull View itemView, CheckpointRvInterface checkpointRvInterface) {
+        public ViewHolder(@NonNull View itemView, RecyclerViewInterface recyclerViewInterface) {
             super(itemView);
             tvSubtaskName = itemView.findViewById(R.id.textViewSubtaskName);
             tvSubtaskDescription = itemView.findViewById(R.id.textViewSubtaskDescription);
 
             itemView.setOnClickListener(view -> {
-                if(checkpointRvInterface != null){
+                if(recyclerViewInterface != null){
                     int position = getAdapterPosition();
 
                     if(position != RecyclerView.NO_POSITION){
-                        checkpointRvInterface.onItemClick(position);
+                        recyclerViewInterface.onItemClick(position);
                     }
                 }
             });

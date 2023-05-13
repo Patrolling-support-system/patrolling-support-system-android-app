@@ -1,35 +1,28 @@
 package pl.agh.patrollingsupportsystem.activities;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
 import com.google.firebase.firestore.DocumentChange;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.GeoPoint;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import pl.agh.patrollingsupportsystem.R;
-import pl.agh.patrollingsupportsystem.checkpointsRecyclerViewProperties.CheckpointRvInterface;
-import pl.agh.patrollingsupportsystem.models.SubtaskModelExtended;
-import pl.agh.patrollingsupportsystem.recyclerViewProperties.TaskModel;
-import pl.agh.patrollingsupportsystem.subtaskListRecyclerView.SubtaskListAdapter;
+import pl.agh.patrollingsupportsystem.recyclerViews.checkpointsRecyclerViewProperties.RecyclerViewInterface;
+import pl.agh.patrollingsupportsystem.recyclerViews.models.SubtaskModelExtended;
+import pl.agh.patrollingsupportsystem.recyclerViews.subtaskListRecyclerView.SubtaskListAdapter;
 
-public class SubtaskActivity extends AppCompatActivity implements CheckpointRvInterface {
+public class SubtaskActivity extends AppCompatActivity implements RecyclerViewInterface {
 
     TextView tvCheckpointCoordinates;
     RecyclerView rvSubtasks;

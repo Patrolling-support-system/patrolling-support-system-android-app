@@ -1,4 +1,4 @@
-package pl.agh.patrollingsupportsystem.recyclerViewProperties;
+package pl.agh.patrollingsupportsystem.recyclerViews.recyclerViewProperties;
 
 import com.google.firebase.Timestamp;
 

@@ -122,7 +122,7 @@
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/locationData"
+                    android:id="@+id/textViewLocation"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -207,7 +207,7 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/coordinatorChat"
+        android:id="@+id/buttonCoordinatorChat"
         android:layout_width="300dp"
         android:layout_height="53dp"
         android:backgroundTint="@color/green_200"
@@ -222,7 +222,7 @@
         app:layout_constraintVertical_bias="0.753" />
 
     <Button
-        android:id="@+id/addReportButton"
+        android:id="@+id/buttonAddReport"
         android:layout_width="300dp"
         android:layout_height="53dp"
         android:backgroundTint="@color/green_200"
@@ -260,7 +260,7 @@
         android:layout_marginRight="15dp"
         android:layout_marginTop="30dp"
         android:layout_marginBottom="30dp"
-        app:layout_constraintBottom_toTopOf="@+id/coordinatorChat"
+        app:layout_constraintBottom_toTopOf="@+id/buttonCoordinatorChat"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/linearLayout">

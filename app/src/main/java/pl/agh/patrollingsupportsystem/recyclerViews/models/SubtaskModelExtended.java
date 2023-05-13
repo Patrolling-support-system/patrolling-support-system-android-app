@@ -1,4 +1,4 @@
-package pl.agh.patrollingsupportsystem.models;
+package pl.agh.patrollingsupportsystem.recyclerViews.models;
 
 public class SubtaskModelExtended {
     String description;

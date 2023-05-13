@@ -1,7 +1,6 @@
 package pl.agh.patrollingsupportsystem.activities;
 
 import androidx.annotation.NonNull;
-import com.google.firebase.firestore.FieldValue;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -9,16 +8,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.widget.Button;
-import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -29,22 +23,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 import pl.agh.patrollingsupportsystem.R;
-import pl.agh.patrollingsupportsystem.checkpointsRecyclerViewProperties.CheckpointAdapter;
-import pl.agh.patrollingsupportsystem.checkpointsRecyclerViewProperties.CheckpointRvInterface;
-import pl.agh.patrollingsupportsystem.models.TaskCheckpoints;
+import pl.agh.patrollingsupportsystem.recyclerViews.checkpointsRecyclerViewProperties.CheckpointAdapter;
+import pl.agh.patrollingsupportsystem.recyclerViews.checkpointsRecyclerViewProperties.RecyclerViewInterface;
 
-public class TaskDetailsActivity extends AppCompatActivity implements CheckpointRvInterface {
+public class TaskDetailsActivity extends AppCompatActivity implements RecyclerViewInterface {
 
-    FirebaseFirestore db;
-    TextView locationData, tvTaskName, tvTaskDescription, tvStartDate, tvEndDate;
-    Button addReportButton;
+    TextView tvTaskName;
+    TextView tvTaskDescription;
+    TextView tvLocation;
+    TextView tvStartDate;
+    TextView tvEndDate;
     Button btnCoordinatorChat;
+    Button btnAddReport;
+    Button btnMap;
     String coordinator;
+    FirebaseFirestore fbDb;
 
-    //Checkpoints
+    //Used for RecyclerView
     RecyclerView rvCheckpointList;
     CheckpointAdapter checkpointAdapter;
-    List<GeoPoint> checkpoints;
+    List<GeoPoint> checkpointList;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -52,87 +50,74 @@ public class TaskDetailsActivity extends AppCompatActivity implements Checkpoint
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task_details);
 
-        tvTaskName = findViewById(R.id.textViewTaskName);
-        tvTaskDescription = findViewById(R.id.textViewTaskDescription);
-        tvStartDate = findViewById(R.id.textViewStartDate);
-        tvEndDate = findViewById(R.id.textViewEndDate);
-
-        Button btnMap = (Button)findViewById(R.id.mapButton);
-        btnCoordinatorChat = findViewById(R.id.coordinatorChat);
-
-
-        btnMap.setOnClickListener(v -> startActivity(new Intent(TaskDetailsActivity.this, MapsActivityCurrentPlace.class)));
-        btnCoordinatorChat.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent i = new Intent(TaskDetailsActivity.this, ChatActivity.class);
-                i.putExtra("coordinator", coordinator);
-                startActivity(i);
-            }
-        });
-
-        locationData = findViewById(R.id.locationData);
-        db = FirebaseFirestore.getInstance();
-        addReportButton = findViewById(R.id.addReportButton);
-
+        //Catch extras
         Bundle documentExtras = getIntent().getExtras();
-        String documentId = null;
+        String taskDocumentId = null;
         if (documentExtras != null) {
-            documentId = documentExtras.getString("documentId");
+            taskDocumentId = documentExtras.getString("task_document");
         }
 
-        db.collection("Tasks").document(documentId)
+        //Layout elements
+        tvTaskName = findViewById(R.id.textViewTaskName);
+        tvTaskDescription = findViewById(R.id.textViewTaskDescription);
+        tvLocation = findViewById(R.id.textViewLocation);
+        tvStartDate = findViewById(R.id.textViewStartDate);
+        tvEndDate = findViewById(R.id.textViewEndDate);
+        btnCoordinatorChat = findViewById(R.id.buttonCoordinatorChat);
+        btnAddReport = findViewById(R.id.buttonAddReport);
+        btnMap = findViewById(R.id.mapButton);
+
+        fbDb = FirebaseFirestore.getInstance();
+
+        //Button onClick functionalities
+        btnCoordinatorChat.setOnClickListener(v -> startActivity(new Intent(TaskDetailsActivity.this, ChatActivity.class).putExtra("coordinator", coordinator)));
+        btnAddReport.setOnClickListener(v -> startActivity(new Intent(TaskDetailsActivity.this, ReportForLocationActivity.class)));
+        btnMap.setOnClickListener(v -> startActivity(new Intent(TaskDetailsActivity.this, MapsActivityCurrentPlace.class)));
+
+
+        fbDb.collection("Tasks").document(taskDocumentId)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
                         if (document.exists()) {
-                            locationData.setText(document.getString("location"));
+                            tvLocation.setText(document.getString("location"));
                             coordinator = document.getString("coordinator");
                             tvTaskName.setText(document.getString("name"));
                             tvTaskDescription.setText(document.getString("taskDescription"));
                             tvStartDate.setText(document.getDate("startDate").toString());
                             tvEndDate.setText(document.getDate("endDate").toString());
                         } else {
-                            // document doesn't exist - Toast?
+                            Toast.makeText(this, "Document doesn't exist - Exception: " + task.getException(), Toast.LENGTH_LONG);
                         }
                     } else {
-                        // document downloading error - Toast?
+                        Toast.makeText(this, "Cannot fetch the data - Exception: " + task.getException(), Toast.LENGTH_LONG);
                     }
                 });
 
-        addReportButton.setOnClickListener(v -> {
-            startActivity(new Intent(TaskDetailsActivity.this, ReportForLocationActivity.class));
-        });
 
         //RecyclerCheckpointView
         rvCheckpointList = findViewById(R.id.recyclerViewCheckpointList);
-        checkpoints = new ArrayList<>();
-        checkpointAdapter = new CheckpointAdapter(this, checkpoints, this);
+        checkpointList = new ArrayList<>();
+        checkpointAdapter = new CheckpointAdapter(this, checkpointList, this);
         rvCheckpointList.setAdapter(checkpointAdapter);
         rvCheckpointList.setLayoutManager(new LinearLayoutManager(this));
         rvCheckpointList.setHasFixedSize(true);
 
-        CollectionReference tasksRef = db.collection("Tasks");
-        DocumentReference taskDocRef = tasksRef.document(documentId);
+        CollectionReference taskCollectionReference = fbDb.collection("Tasks");
+        DocumentReference taskDocumentReference = taskCollectionReference.document(taskDocumentId);
 
-        taskDocRef.get().addOnSuccessListener(documentSnapshot -> {
+        taskDocumentReference.get().addOnSuccessListener(documentSnapshot -> {
             if (documentSnapshot.exists()) {
-                // Pobranie pola checkpoints z dokumentu
-                List<GeoPoint> checkpointsData = (List<GeoPoint>) documentSnapshot.get("checkpoints");
-
-                if (checkpointsData != null) {
-                    // Aktualizacja listy checkpoints i powiadomienie adaptera
-                    checkpoints.clear();
-                    checkpoints.addAll(checkpointsData);
+                List<GeoPoint> tempCheckpointList = (List<GeoPoint>) documentSnapshot.get("checkpoints");
+                if (tempCheckpointList != null) {
+                    checkpointList.clear();
+                    checkpointList.addAll(tempCheckpointList);
                     checkpointAdapter.notifyDataSetChanged();
                 }
             }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                // Obsługa błędu pobierania danych
-            }
+        }).addOnFailureListener(e -> {
+            Toast.makeText(this, "Database issue: " + e.getMessage().toString(), Toast.LENGTH_LONG).show();
         });
 
 
@@ -140,11 +125,10 @@ public class TaskDetailsActivity extends AppCompatActivity implements Checkpoint
 
     @Override
     public void onItemClick(int position) {
-        Toast t = Toast.makeText(this, checkpoints.get(position).toString(), Toast.LENGTH_SHORT);
-        t.show();
+        Toast.makeText(this, checkpointList.get(position).toString(), Toast.LENGTH_SHORT).show();
         Intent i = new Intent(TaskDetailsActivity.this, SubtaskActivity.class);
-        i.putExtra("checkpoint_latitude", checkpoints.get(position).getLatitude());
-        i.putExtra("checkpoint_longitude", checkpoints.get(position).getLongitude());
+        i.putExtra("checkpoint_latitude", checkpointList.get(position).getLatitude());
+        i.putExtra("checkpoint_longitude", checkpointList.get(position).getLongitude());
         startActivity(i);
     }
 }

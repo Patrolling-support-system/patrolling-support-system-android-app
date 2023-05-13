@@ -1,4 +1,4 @@
-package pl.agh.patrollingsupportsystem.recyclerViewProperties;
+package pl.agh.patrollingsupportsystem.recyclerViews.recyclerViewProperties;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -12,15 +12,17 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 
 import pl.agh.patrollingsupportsystem.R;
+import pl.agh.patrollingsupportsystem.recyclerViews.RecyclerViewInterface;
 
 public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ActionViewHolder> {
-    RecyclerViewInterface recyclerViewInterface;
     Context context;
-    ArrayList<TaskModel> list;
+    ArrayList<TaskModel> taskList;
+    RecyclerViewInterface recyclerViewInterface;
 
-    public TaskListAdapter(Context context, ArrayList<TaskModel> list, RecyclerViewInterface recyclerViewInterface) {
+
+    public TaskListAdapter(Context context, ArrayList<TaskModel> taskList, RecyclerViewInterface recyclerViewInterface) {
         this.context = context;
-        this.list = list;
+        this.taskList = taskList;
         this.recyclerViewInterface = recyclerViewInterface;
     }
 
@@ -33,32 +35,35 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.Action
 
     @Override
     public void onBindViewHolder(@NonNull ActionViewHolder holder, int position) {
-        TaskModel taskModel = list.get(position);
-        holder.name.setText(taskModel.getName());
-        holder.someData.setText(taskModel.getLocation());
-        holder.startDate.setText(taskModel.getStartDate().toDate().toString());
+        TaskModel taskModel = taskList.get(position);
+        holder.tvTaskName.setText(taskModel.getName());
+        holder.tvTaskLocation.setText(taskModel.getLocation());
+        holder.tvTaskStartDate.setText(taskModel.getStartDate().toDate().toString());
 
     }
 
     @Override
     public int getItemCount() {
-        return list.size();
+        return taskList.size();
     }
 
     public static class ActionViewHolder extends RecyclerView.ViewHolder{
 
-        TextView name, someData, startDate;
+        TextView tvTaskName;
+        TextView tvTaskLocation;
+        TextView tvTaskStartDate;
 
-        public TextView getName() {
-            return name;
-        }
+//        public TextView getName() {
+//            return name;
+//        }
+        //IS IT NEEDED LOL?
 
         public ActionViewHolder(@NonNull View itemView, RecyclerViewInterface recyclerViewInterface) {
             super(itemView);
 
-            name = itemView.findViewById(R.id.textViewTaskName);
-            someData = itemView.findViewById(R.id.textViewTaskLocation);
-            startDate = itemView.findViewById(R.id.textViewTaskStartDate);
+            tvTaskName = itemView.findViewById(R.id.textViewTaskName);
+            tvTaskLocation = itemView.findViewById(R.id.textViewTaskLocation);
+            tvTaskStartDate = itemView.findViewById(R.id.textViewTaskStartDate);
 
             itemView.setOnClickListener(view -> {
                 if(recyclerViewInterface != null){

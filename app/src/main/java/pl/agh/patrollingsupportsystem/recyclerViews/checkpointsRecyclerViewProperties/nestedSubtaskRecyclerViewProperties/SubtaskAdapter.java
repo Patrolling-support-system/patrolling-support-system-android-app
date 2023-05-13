@@ -1,4 +1,4 @@
-package pl.agh.patrollingsupportsystem.checkpointsRecyclerViewProperties.nestedSubtaskRecyclerViewProperties;
+package pl.agh.patrollingsupportsystem.recyclerViews.checkpointsRecyclerViewProperties.nestedSubtaskRecyclerViewProperties;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 import pl.agh.patrollingsupportsystem.R;
-import pl.agh.patrollingsupportsystem.models.SubtaskModel;
+import pl.agh.patrollingsupportsystem.recyclerViews.models.SubtaskModel;
 
 public class SubtaskAdapter extends RecyclerView.Adapter<SubtaskAdapter.ViewHolder>{
 

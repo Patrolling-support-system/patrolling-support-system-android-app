@@ -1,4 +1,4 @@
-package pl.agh.patrollingsupportsystem.audioRecRecyclerViewProperties;
+package pl.agh.patrollingsupportsystem.recyclerViews.audioRecRecyclerViewProperties;
 
 import android.content.Context;
 import android.view.LayoutInflater;

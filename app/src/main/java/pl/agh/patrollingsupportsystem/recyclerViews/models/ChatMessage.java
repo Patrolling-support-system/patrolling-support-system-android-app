@@ -1,4 +1,4 @@
-package pl.agh.patrollingsupportsystem.models;
+package pl.agh.patrollingsupportsystem.recyclerViews.models;
 
 import java.time.LocalDateTime;
 
