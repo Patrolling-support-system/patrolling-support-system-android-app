@@ -12,14 +12,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 import pl.agh.patrollingsupportsystem.R;
-import pl.agh.patrollingsupportsystem.recyclerViews.models.SubtaskModel;
+import pl.agh.patrollingsupportsystem.recyclerViews.models.SubtaskModelExtended;
 
 public class SubtaskAdapter extends RecyclerView.Adapter<SubtaskAdapter.ViewHolder>{
 
-    private List<SubtaskModel> subtasksList;
+    private List<SubtaskModelExtended> subtasksList;
     Context context;
 
-    public SubtaskAdapter(List<SubtaskModel> subtasksList, Context context) {
+    public SubtaskAdapter(List<SubtaskModelExtended> subtasksList, Context context) {
         this.subtasksList = subtasksList;
         this.context = context;
     }
@@ -33,7 +33,7 @@ public class SubtaskAdapter extends RecyclerView.Adapter<SubtaskAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        SubtaskModel currentItem = subtasksList.get(position);
+        SubtaskModelExtended currentItem = subtasksList.get(position);
         holder.tvSubtaskName.setText(currentItem.getSubtaskName());
     }
 

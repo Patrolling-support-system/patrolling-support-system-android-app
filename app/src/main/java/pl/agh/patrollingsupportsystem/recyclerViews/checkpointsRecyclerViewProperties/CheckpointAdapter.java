@@ -23,7 +23,7 @@ import java.util.List;
 
 import pl.agh.patrollingsupportsystem.R;
 import pl.agh.patrollingsupportsystem.recyclerViews.checkpointsRecyclerViewProperties.nestedSubtaskRecyclerViewProperties.SubtaskAdapter;
-import pl.agh.patrollingsupportsystem.recyclerViews.models.SubtaskModel;
+import pl.agh.patrollingsupportsystem.recyclerViews.models.SubtaskModelExtended;
 
 public class CheckpointAdapter extends RecyclerView.Adapter<CheckpointAdapter.ViewHolder>{
     FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -55,21 +55,22 @@ public class CheckpointAdapter extends RecyclerView.Adapter<CheckpointAdapter.Vi
 
 
         holder.textViewCheckpointName.setText(String.valueOf(checkpoint.getLatitude()) + " | " + String.valueOf(checkpoint.getLongitude()));
-        List<SubtaskModel> subtasks = new ArrayList<>();
-
+        List<SubtaskModelExtended> subtasks = new ArrayList<>();
+        SubtaskAdapter subtaskAdapter = new SubtaskAdapter(subtasks, holder.rvSubtasks.getContext());
         db.collection("CheckpointSubtasks").whereEqualTo("checkpoint", checkpoint)
                 .get().addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         QuerySnapshot querySnapshot = task.getResult();
                         for (QueryDocumentSnapshot document : querySnapshot) {
-                            SubtaskModel subtask = document.toObject(SubtaskModel.class);
+                            SubtaskModelExtended subtask = document.toObject(SubtaskModelExtended.class);
                             subtasks.add(subtask);
+                            subtaskAdapter.notifyDataSetChanged();
                             //documentList.add(document.getId());
                         }
                     } else {
                         Log.d(TAG, "Error getting documents: ", task.getException());
                     }
-                    SubtaskAdapter subtaskAdapter = new SubtaskAdapter(subtasks, holder.rvSubtasks.getContext());
+
                     holder.rvSubtasks.setAdapter(subtaskAdapter);
                 });
 

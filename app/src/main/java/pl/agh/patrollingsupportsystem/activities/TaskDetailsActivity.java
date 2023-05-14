@@ -125,7 +125,6 @@ public class TaskDetailsActivity extends AppCompatActivity implements RecyclerVi
 
     @Override
     public void onItemClick(int position) {
-        Toast.makeText(this, checkpointList.get(position).toString(), Toast.LENGTH_SHORT).show();
         Intent i = new Intent(TaskDetailsActivity.this, SubtaskActivity.class);
         i.putExtra("checkpoint_latitude", checkpointList.get(position).getLatitude());
         i.putExtra("checkpoint_longitude", checkpointList.get(position).getLongitude());

@@ -7,6 +7,10 @@ public class SubtaskModelExtended {
     public SubtaskModelExtended() {
     }
 
+    public SubtaskModelExtended(String subtaskName) {
+        this.subtaskName = subtaskName;
+    }
+
     public SubtaskModelExtended(String description, String subtaskName) {
         this.description = description;
         this.subtaskName = subtaskName;

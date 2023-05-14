@@ -51,6 +51,7 @@ public class SubtaskActivity extends AppCompatActivity implements RecyclerViewIn
 
         rvSubtasks = findViewById(R.id.recyclerViewSubtaskList);
         rvSubtasks.setLayoutManager(new LinearLayoutManager(this));
+        SubtaskListAdapter subtaskListAdapter = new SubtaskListAdapter( this, subtasks, this);
 
         tvCheckpointCoordinates = findViewById(R.id.textViewCheckpointCoordinates);
         tvCheckpointCoordinates.setText(latitude + " | " + longitude);
@@ -68,11 +69,12 @@ public class SubtaskActivity extends AppCompatActivity implements RecyclerViewIn
                             //tvCheckpointCoordinates.setText(dc.getDocument().get("SubtaskName").toString());
                             subtasks.add(dc.getDocument().toObject(SubtaskModelExtended.class));
                             documents.add(dc.getDocument().getId());
+                            subtaskListAdapter.notifyDataSetChanged();
                         }
 
                     }
                 });
-        SubtaskListAdapter subtaskListAdapter = new SubtaskListAdapter( this, subtasks, this);
+
         rvSubtasks.setAdapter(subtaskListAdapter);
 
     }
