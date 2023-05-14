@@ -21,7 +21,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -34,9 +33,9 @@ import java.util.HashMap;
 import java.util.List;
 
 import pl.agh.patrollingsupportsystem.R;
-import pl.agh.patrollingsupportsystem.chatRecyclerViewProperties.ChatAdapter;
+import pl.agh.patrollingsupportsystem.recyclerViews.chatRecyclerViewProperties.ChatAdapter;
 import pl.agh.patrollingsupportsystem.databinding.ActivityChatBinding;
-import pl.agh.patrollingsupportsystem.models.ChatMessage;
+import pl.agh.patrollingsupportsystem.recyclerViews.models.ChatMessage;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -100,12 +99,6 @@ public class ChatActivity extends AppCompatActivity {
 
     }
 
-
-
-//    private void init() {
-//        //preferenceManager = new PreferenceManager(getApplicationContext());
-//
-//    }
 
     private void listenMessages(){
         database.collection("Chat")

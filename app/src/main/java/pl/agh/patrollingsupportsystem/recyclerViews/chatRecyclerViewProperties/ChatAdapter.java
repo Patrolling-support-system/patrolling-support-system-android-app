@@ -1,4 +1,4 @@
-package pl.agh.patrollingsupportsystem.chatRecyclerViewProperties;
+package pl.agh.patrollingsupportsystem.recyclerViews.chatRecyclerViewProperties;
 
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -10,7 +10,7 @@ import java.util.List;
 
 import pl.agh.patrollingsupportsystem.databinding.ItemContainerReceivedMessageBinding;
 import pl.agh.patrollingsupportsystem.databinding.ItemContainerSentMessageBinding;
-import pl.agh.patrollingsupportsystem.models.ChatMessage;
+import pl.agh.patrollingsupportsystem.recyclerViews.models.ChatMessage;
 
 
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{

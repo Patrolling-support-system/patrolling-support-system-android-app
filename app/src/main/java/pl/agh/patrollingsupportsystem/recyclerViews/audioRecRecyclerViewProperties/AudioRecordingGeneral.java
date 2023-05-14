@@ -1,4 +1,4 @@
-package pl.agh.patrollingsupportsystem.audioRecRecyclerViewProperties;
+package pl.agh.patrollingsupportsystem.recyclerViews.audioRecRecyclerViewProperties;
 
 public class AudioRecordingGeneral {
     String fileName;

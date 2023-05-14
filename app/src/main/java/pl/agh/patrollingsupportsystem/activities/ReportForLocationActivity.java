@@ -31,7 +31,6 @@ import com.bumptech.glide.Glide;
 import com.google.android.datatransport.BuildConfig;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
@@ -51,9 +50,9 @@ import java.util.UUID;
 
 //import pl.agh.patrollingsupportsystem.BuildConfig;
 import pl.agh.patrollingsupportsystem.R;
-import pl.agh.patrollingsupportsystem.audioRecRecyclerViewProperties.AudioRecordingGeneral;
-import pl.agh.patrollingsupportsystem.audioRecRecyclerViewProperties.AudioRecordingListAdapter;
-import pl.agh.patrollingsupportsystem.audioRecRecyclerViewProperties.RecyclerViewInterface;
+import pl.agh.patrollingsupportsystem.recyclerViews.audioRecRecyclerViewProperties.AudioRecordingGeneral;
+import pl.agh.patrollingsupportsystem.recyclerViews.audioRecRecyclerViewProperties.AudioRecordingListAdapter;
+import pl.agh.patrollingsupportsystem.recyclerViews.audioRecRecyclerViewProperties.RecyclerViewInterface;
 
 public class ReportForLocationActivity extends AppCompatActivity implements RecyclerViewInterface {
 
