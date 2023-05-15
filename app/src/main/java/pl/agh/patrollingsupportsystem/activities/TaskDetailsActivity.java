@@ -1,6 +1,5 @@
 package pl.agh.patrollingsupportsystem.activities;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -12,7 +11,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -125,7 +123,7 @@ public class TaskDetailsActivity extends AppCompatActivity implements RecyclerVi
 
     @Override
     public void onItemClick(int position) {
-        Intent i = new Intent(TaskDetailsActivity.this, SubtaskActivity.class);
+        Intent i = new Intent(TaskDetailsActivity.this, SubtaskListActivity.class);
         i.putExtra("checkpoint_latitude", checkpointList.get(position).getLatitude());
         i.putExtra("checkpoint_longitude", checkpointList.get(position).getLongitude());
         startActivity(i);

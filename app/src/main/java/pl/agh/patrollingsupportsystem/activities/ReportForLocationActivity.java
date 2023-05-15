@@ -1,6 +1,7 @@
 package pl.agh.patrollingsupportsystem.activities;
 
 import static android.content.ContentValues.TAG;
+import static android.widget.ImageView.ScaleType.FIT_XY;
 
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
@@ -97,7 +98,7 @@ public class ReportForLocationActivity extends AppCompatActivity implements Recy
 
         //RecycleView
         audioRecordingItemList = new ArrayList<>();
-        audioRecordingListAdapter = new AudioRecordingListAdapter(this, audioRecordingItemList, this);
+        audioRecordingListAdapter = new AudioRecordingListAdapter(this, audioRecordingFiles, this);
         rvAudioRecordingList = findViewById(R.id.rvAudioRecordingList);
         rvAudioRecordingList.setHasFixedSize(true);
         rvAudioRecordingList.setAdapter(audioRecordingListAdapter);
@@ -106,25 +107,22 @@ public class ReportForLocationActivity extends AppCompatActivity implements Recy
         //Photo from memory
         mChoosePhoto = registerForActivityResult(
                 new ActivityResultContracts.GetMultipleContents(),
-                new ActivityResultCallback<List<Uri>>() {
-                    @Override
-                    public void onActivityResult(List<Uri> result) {
-                        res.addAll(result);
-                        for (int i = 0; i < result.size(); i++) {
-                            ImageView imageView = new ImageView(ReportForLocationActivity.this);
-                            imageView.setPadding(0,0,0,0);
-                            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                                    ViewGroup.LayoutParams.WRAP_CONTENT);
-                            imageView.setLayoutParams(params);
-                            imageView.setAdjustViewBounds(true);
+                result -> {
+                    res.addAll(result);
+                    for (int i = 0; i < result.size(); i++) {
+                        ImageView imageView = new ImageView(ReportForLocationActivity.this);
+                        imageView.setPadding(0,0,0,0);
+                        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                                ViewGroup.LayoutParams.WRAP_CONTENT,
+                                ViewGroup.LayoutParams.WRAP_CONTENT);
+                        imageView.setLayoutParams(params);
+                        imageView.setAdjustViewBounds(true);
 
-                            Glide.with(ReportForLocationActivity.this)
-                                    .load(result.get(i))
-                                    .into(imageView);
+                        Glide.with(ReportForLocationActivity.this)
+                                .load(result.get(i))
+                                .into(imageView);
 
-                            galleryLinearLayout.addView(imageView);
-                        }
+                        galleryLinearLayout.addView(imageView);
                     }
                 });
 
@@ -166,11 +164,8 @@ public class ReportForLocationActivity extends AppCompatActivity implements Recy
                 StorageReference imageRef = storageRef.child("images/" + UUID.randomUUID().toString());
                 UploadTask uploadTask = imageRef.putFile(res.get(i));
 
-                uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        // TODO Toast?
-                    }
+                uploadTask.addOnSuccessListener(taskSnapshot -> {
+                    // TODO Toast?
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
@@ -184,60 +179,54 @@ public class ReportForLocationActivity extends AppCompatActivity implements Recy
 
 
         Button recordButton = findViewById(R.id.startPauzeRecButton);
-        recordButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!isRecording) {
-                    // Start recording
-                    recorder = new MediaRecorder();
-                    recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-                    recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-                    recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-                    String fileNameStr = (new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) +  "test.mp4");
-                    AudioRecordingGeneral fileName = new AudioRecordingGeneral();
-                    fileName.setFileName(fileNameStr);
-                    audioRecordingFiles.add(fileName);
-                    recorder.setOutputFile(getExternalCacheDir().getAbsolutePath() + fileName);
-                    System.out.println(Environment.getExternalStorageDirectory() + File.separator
-                            + Environment.DIRECTORY_DCIM + File.separator + "FILE_NAME");
+        recordButton.setOnClickListener(v -> {
+            if (!isRecording) {
+                // Start recording
+                recorder = new MediaRecorder();
+                recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+                recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+                recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+                String fileNameStr = (new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) +  "test.mp4");
+                AudioRecordingGeneral fileName = new AudioRecordingGeneral();
+                fileName.setFileName(fileNameStr);
+                audioRecordingFiles.add(fileName);
+                recorder.setOutputFile(getExternalCacheDir().getAbsolutePath() + fileName);
+                System.out.println(Environment.getExternalStorageDirectory() + File.separator
+                        + Environment.DIRECTORY_DCIM + File.separator + "FILE_NAME");
 
-                    try {
-                        recorder.prepare();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                    recorder.start();
-                    isRecording = true;
-                    isPaused = false;
-                    recordButton.setText("Pauza");
-                } else if (isRecording && !isPaused) {
-                    // Pause recording
-                    recorder.pause();
-                    isPaused = true;
-                    recordButton.setText("Wznów");
-                } else if (isRecording && isPaused) {
-                    // Resume recording
-                    recorder.resume();
-                    isPaused = false;
-                    recordButton.setText("Pauza");
+                try {
+                    recorder.prepare();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
+
+                recorder.start();
+                isRecording = true;
+                isPaused = false;
+                recordButton.setText("Pauza");
+            } else if (isRecording && !isPaused) {
+                // Pause recording
+                recorder.pause();
+                isPaused = true;
+                recordButton.setText("Wznów");
+            } else if (isRecording && isPaused) {
+                // Resume recording
+                recorder.resume();
+                isPaused = false;
+                recordButton.setText("Pauza");
             }
         });
 
         Button stopButton = findViewById(R.id.stopRec);
-        stopButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isRecording) {
-                    // Stop recording
-                    recorder.stop();
-                    recorder.release();
-                    isRecording = false;
-                    isPaused = false;
-                    recordButton.setText("Nagraj");
-                    EventChangeListener();
-                }
+        stopButton.setOnClickListener(v -> {
+            if (isRecording) {
+                // Stop recording
+                recorder.stop();
+                recorder.release();
+                isRecording = false;
+                isPaused = false;
+                recordButton.setText("Nagraj");
+                EventChangeListener();
             }
         });
 
@@ -273,7 +262,6 @@ public class ReportForLocationActivity extends AppCompatActivity implements Recy
     }
 
     private void EventChangeListener() {
-        audioRecordingFiles.forEach(file -> audioRecordingItemList.add(file));
         audioRecordingListAdapter.notifyDataSetChanged();
     }
 
@@ -292,13 +280,14 @@ public class ReportForLocationActivity extends AppCompatActivity implements Recy
             // Continue only if the File was successfully created
             if (photoFile != null) {
                 mImageUri = FileProvider.getUriForFile(Objects.requireNonNull(getApplicationContext()),
-                        BuildConfig.APPLICATION_ID + ".provider",
+                        BuildConfig.APPLICATION_ID+ ".provider",
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mImageUri);
                 mTakePictureLauncher.launch(mImageUri);
             }
         }
     }
+
 
     private File createImageFile() throws IOException {
         // Create an image file name

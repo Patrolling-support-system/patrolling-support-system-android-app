@@ -22,7 +22,7 @@ import pl.agh.patrollingsupportsystem.recyclerViews.checkpointsRecyclerViewPrope
 import pl.agh.patrollingsupportsystem.recyclerViews.models.SubtaskModelExtended;
 import pl.agh.patrollingsupportsystem.recyclerViews.subtaskListRecyclerView.SubtaskListAdapter;
 
-public class SubtaskActivity extends AppCompatActivity implements RecyclerViewInterface {
+public class SubtaskListActivity extends AppCompatActivity implements RecyclerViewInterface {
 
     TextView tvCheckpointCoordinates;
     RecyclerView rvSubtasks;
@@ -81,7 +81,7 @@ public class SubtaskActivity extends AppCompatActivity implements RecyclerViewIn
 
     @Override
     public void onItemClick(int position) {
-        Intent i = new Intent(SubtaskActivity.this, SubtaskDetailsActivity.class);
+        Intent i = new Intent(SubtaskListActivity.this, SubtaskDetailsActivity.class);
         i.putExtra("subtask_document", documents.get(position));
         startActivity(i);
     }
