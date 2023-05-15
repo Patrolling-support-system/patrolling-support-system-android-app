@@ -54,6 +54,7 @@ public class TaskDetailsActivity extends AppCompatActivity implements RecyclerVi
         if (documentExtras != null) {
             taskDocumentId = documentExtras.getString("task_document");
         }
+        String finalTaskDocumentId = taskDocumentId;
 
         //Layout elements
         tvTaskName = findViewById(R.id.textViewTaskName);
@@ -69,7 +70,11 @@ public class TaskDetailsActivity extends AppCompatActivity implements RecyclerVi
 
         //Button onClick functionalities
         btnCoordinatorChat.setOnClickListener(v -> startActivity(new Intent(TaskDetailsActivity.this, ChatActivity.class).putExtra("coordinator", coordinator)));
-        btnAddReport.setOnClickListener(v -> startActivity(new Intent(TaskDetailsActivity.this, ReportForLocationActivity.class)));
+        btnAddReport.setOnClickListener(v -> {
+            Intent i = new Intent(TaskDetailsActivity.this, ReportForLocationActivity.class);
+            i.putExtra("task_document", finalTaskDocumentId);
+            startActivity(i);
+        });
         btnMap.setOnClickListener(v -> startActivity(new Intent(TaskDetailsActivity.this, MapsActivityCurrentPlace.class)));
 
 

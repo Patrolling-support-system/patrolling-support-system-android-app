@@ -9,9 +9,10 @@
     tools:context=".activities.ReportForLocationActivity">
 
     <ScrollView
-        android:id="@+id/galleryScrollView"
+        android:id="@+id/scrollViewGallery"
         android:layout_width="match_parent"
         android:layout_height="300dp"
+        android:layout_weight="1"
         android:contentDescription="@string/app_name"
         android:visibility="visible">
 
@@ -32,20 +33,20 @@
 
 
         <Button
-            android:id="@+id/addImagesButton"
+            android:id="@+id/buttonAddImage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="10dp"
             android:layout_weight="1"
             android:backgroundTint="@color/green_200"
             android:fontFamily="@font/signika_negative"
-            android:text="Add Images"
+            android:text="Add Image"
             android:textColor="@color/green_800"
             android:visibility="visible"
             tools:visibility="visible" />
 
         <Button
-            android:id="@+id/takePictureButton"
+            android:id="@+id/buttonTakePicture"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="10dp"
@@ -57,22 +58,10 @@
             android:visibility="visible"
             tools:visibility="visible" />
 
-        <Button
-            android:id="@+id/sendImagesButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="10dp"
-            android:layout_weight="1"
-            android:backgroundTint="@color/green_200"
-            android:fontFamily="@font/signika_negative"
-            android:text="Send Images"
-            android:textColor="@color/green_800"
-            android:visibility="visible"
-            tools:visibility="visible" />
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvAudioRecordingList"
+        android:id="@+id/recyclerViewAudioRecordingList"
         android:layout_width="match_parent"
         android:layout_height="120dp"
         android:layout_marginVertical="10dp" />
@@ -85,7 +74,7 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/startPauzeRecButton"
+            android:id="@+id/buttonStartPauzeRecording"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="30dp"
@@ -98,7 +87,7 @@
             tools:visibility="visible" />
 
         <Button
-            android:id="@+id/stopRec"
+            android:id="@+id/buttonStopRecording"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="30dp"
@@ -117,9 +106,11 @@
         android:orientation="horizontal">
 
         <EditText
-            android:id="@+id/textNote"
-            android:layout_width="140dp"
-            android:layout_height="52dp"
+            android:id="@+id/editTextNote"
+            android:layout_width="match_parent"
+            android:layout_marginHorizontal="10dp"
+            android:layout_marginVertical="10dp"
+            android:layout_height="80dp"
             android:layout_weight="1"
             android:backgroundTint="@color/green_200"
             android:fontFamily="@font/signika_negative"
@@ -127,22 +118,12 @@
             android:textSize="15sp"
             tools:visibility="visible" />
 
-        <Button
-            android:id="@+id/sendTextNote"
-            android:layout_width="wrap_content"
-            android:layout_height="52dp"
-            android:backgroundTint="@color/green_200"
-            android:fontFamily="@font/signika_negative"
-            android:text="Send text note"
-            android:textColor="@color/green_800"
-            android:visibility="visible"
-            tools:visibility="visible" />
     </LinearLayout>
 
     <Button
         android:id="@+id/buttonSendReport"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_marginHorizontal="10dp"
         android:layout_weight="1"
         android:backgroundTint="@color/green_200"

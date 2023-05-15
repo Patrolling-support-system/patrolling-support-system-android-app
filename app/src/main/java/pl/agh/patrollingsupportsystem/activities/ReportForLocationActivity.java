@@ -1,9 +1,7 @@
 package pl.agh.patrollingsupportsystem.activities;
 
 import static android.content.ContentValues.TAG;
-import static android.widget.ImageView.ScaleType.FIT_XY;
 
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -20,7 +18,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
@@ -57,19 +54,29 @@ import pl.agh.patrollingsupportsystem.recyclerViews.audioRecRecyclerViewProperti
 
 public class ReportForLocationActivity extends AppCompatActivity implements RecyclerViewInterface {
 
-    Button addImagesButton, takePictureButton, sendImagesButton, sendTextNote;
-    EditText noteField;
-    LinearLayout galleryLinearLayout;
+    Button btnAddImage;
+    Button btnTakePicture;
+    Button btnSendReport;
+    Button sendImagesButton;
+    Button sendTextNote;
+    EditText etNote;
+    LinearLayout linearLayoutGallery;
 
-    ActivityResultLauncher<String> mChoosePhoto;
+    ActivityResultLauncher<String> choosePhoto;
 
-    Uri mImageUri;
-    List<Uri> res = new ArrayList<>();
-    ActivityResultLauncher<Uri> mTakePictureLauncher;
+    String reportDocumentId;
 
-    StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+    Uri imageUri;
+    List<Uri> imagesList = new ArrayList<>();
+    ActivityResultLauncher<Uri> takePictureLauncher;
 
-    private FirebaseFirestore db;
+    StorageReference fbStorageReference;
+
+    List<String> imageReferenceList;
+    List<String> audioRecordingReferenceList;
+
+
+    private FirebaseFirestore fbDb;
 
     //Audio
     MediaRecorder recorder;
@@ -78,8 +85,8 @@ public class ReportForLocationActivity extends AppCompatActivity implements Recy
 
     //rv
     RecyclerView rvAudioRecordingList;
-    ArrayList<AudioRecordingGeneral> audioRecordingItemList;
     AudioRecordingListAdapter audioRecordingListAdapter;
+    ArrayList<AudioRecordingGeneral> audioRecordingList = new ArrayList<>();
     ArrayList<AudioRecordingGeneral> audioRecordingFiles = new ArrayList<>();
 
     @SuppressLint("MissingInflatedId")
@@ -87,28 +94,35 @@ public class ReportForLocationActivity extends AppCompatActivity implements Recy
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report_for_location);
-        db = FirebaseFirestore.getInstance();
 
-        addImagesButton = findViewById(R.id.addImagesButton);
-        sendImagesButton = findViewById(R.id.sendImagesButton);
-        takePictureButton = findViewById(R.id.takePictureButton);
-        noteField = findViewById(R.id.textNote);
-        sendTextNote = findViewById(R.id.sendTextNote);
-        galleryLinearLayout = findViewById(R.id.galleryLinearLayout);
+        reportDocumentId = generateDocumentId();
 
-        //RecycleView
-        audioRecordingItemList = new ArrayList<>();
+        imageReferenceList = new ArrayList<>();
+        audioRecordingReferenceList = new ArrayList<>();
+
+        //Firebase
+        fbDb = FirebaseFirestore.getInstance();
+        fbStorageReference = FirebaseStorage.getInstance().getReference();
+
+        //Layout elements
+        btnAddImage = findViewById(R.id.buttonAddImage);
+        btnTakePicture = findViewById(R.id.buttonTakePicture);
+        etNote = findViewById(R.id.editTextNote);
+        linearLayoutGallery = findViewById(R.id.galleryLinearLayout);
+        btnSendReport = findViewById(R.id.buttonSendReport);
+
+        //RecycleView for Audio
         audioRecordingListAdapter = new AudioRecordingListAdapter(this, audioRecordingFiles, this);
-        rvAudioRecordingList = findViewById(R.id.rvAudioRecordingList);
+        rvAudioRecordingList = findViewById(R.id.recyclerViewAudioRecordingList);
         rvAudioRecordingList.setHasFixedSize(true);
         rvAudioRecordingList.setAdapter(audioRecordingListAdapter);
         rvAudioRecordingList.setLayoutManager(new LinearLayoutManager(this));
 
-        //Photo from memory
-        mChoosePhoto = registerForActivityResult(
+        //Photo from device
+        choosePhoto = registerForActivityResult(
                 new ActivityResultContracts.GetMultipleContents(),
                 result -> {
-                    res.addAll(result);
+                    imagesList.addAll(result);
                     for (int i = 0; i < result.size(); i++) {
                         ImageView imageView = new ImageView(ReportForLocationActivity.this);
                         imageView.setPadding(0,0,0,0);
@@ -122,20 +136,20 @@ public class ReportForLocationActivity extends AppCompatActivity implements Recy
                                 .load(result.get(i))
                                 .into(imageView);
 
-                        galleryLinearLayout.addView(imageView);
+                        linearLayoutGallery.addView(imageView);
                     }
                 });
 
-        addImagesButton.setOnClickListener(v -> {
-            mChoosePhoto.launch("image/*");
+        btnAddImage.setOnClickListener(v -> {
+            choosePhoto.launch("image/*");
         });
 
         //Take picture
 
-        mTakePictureLauncher =
+        takePictureLauncher =
                 registerForActivityResult(new ActivityResultContracts.TakePicture(), result -> {
                     if (result) {
-                        res.add(mImageUri);
+                        imagesList.add(imageUri);
                         ImageView imageView = new ImageView(ReportForLocationActivity.this);
                         imageView.setPadding(0,0,0,0);
                         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
@@ -145,55 +159,44 @@ public class ReportForLocationActivity extends AppCompatActivity implements Recy
                         imageView.setAdjustViewBounds(true);
 
                         Glide.with(ReportForLocationActivity.this)
-                                .load(mImageUri)
+                                .load(imageUri)
                                 .into(imageView);
 
-                        galleryLinearLayout.addView(imageView);
+                        linearLayoutGallery.addView(imageView);
                     } else {
                         Toast.makeText(this, "Picture not taken", Toast.LENGTH_SHORT).show();
                     }
                 });
 
-        takePictureButton.setOnClickListener(v -> {
+        btnTakePicture.setOnClickListener(v -> {
             dispatchTakePictureIntent();
         });
 
         //Send images:
-        sendImagesButton.setOnClickListener(v -> {
-            for (int i = 0; i < res.size(); i++) {
-                StorageReference imageRef = storageRef.child("images/" + UUID.randomUUID().toString());
-                UploadTask uploadTask = imageRef.putFile(res.get(i));
 
-                uploadTask.addOnSuccessListener(taskSnapshot -> {
-                    // TODO Toast?
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        // TODO Toast?
-                    }
-                });
-            }
-        });
+        Bundle documentExtras = getIntent().getExtras();
+        String taskDocumentId = null;
+        if (documentExtras != null) {
+            taskDocumentId = documentExtras.getString("task_document");
+        }
+        String finalTaskDocumentId = taskDocumentId;
 
         //Audio recording
 
 
-        Button recordButton = findViewById(R.id.startPauzeRecButton);
+        Button recordButton = findViewById(R.id.buttonStartPauzeRecording);
         recordButton.setOnClickListener(v -> {
             if (!isRecording) {
                 // Start recording
                 recorder = new MediaRecorder();
                 recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
                 recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-                recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-                String fileNameStr = (new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) +  "test.mp4");
+                recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+                String fileNameStr = (new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) +  ".mpeg4");
                 AudioRecordingGeneral fileName = new AudioRecordingGeneral();
                 fileName.setFileName(fileNameStr);
-                audioRecordingFiles.add(fileName);
-                recorder.setOutputFile(getExternalCacheDir().getAbsolutePath() + fileName);
-                System.out.println(Environment.getExternalStorageDirectory() + File.separator
-                        + Environment.DIRECTORY_DCIM + File.separator + "FILE_NAME");
-
+                audioRecordingList.add(fileName);
+                recorder.setOutputFile(getExternalCacheDir().getAbsolutePath() + fileName.getFileName());
                 try {
                     recorder.prepare();
                 } catch (IOException e) {
@@ -217,7 +220,7 @@ public class ReportForLocationActivity extends AppCompatActivity implements Recy
             }
         });
 
-        Button stopButton = findViewById(R.id.stopRec);
+        Button stopButton = findViewById(R.id.buttonStopRecording);
         stopButton.setOnClickListener(v -> {
             if (isRecording) {
                 // Stop recording
@@ -226,37 +229,17 @@ public class ReportForLocationActivity extends AppCompatActivity implements Recy
                 isRecording = false;
                 isPaused = false;
                 recordButton.setText("Nagraj");
+                audioRecordingFiles.clear();
+                audioRecordingFiles.addAll(audioRecordingList);
                 EventChangeListener();
             }
         });
 
-        // text note
-
-
-        sendTextNote.setOnClickListener(v -> {
-            String note = noteField.getText().toString();
-
-            // creating report with text note
-            // after changing actionList to Tasks change to current checkpoint from db
-
-            Map<String, Object> checkpointReport = new HashMap<>();
-            checkpointReport.put("checkpointNumber", 1);
-            checkpointReport.put("notes", note);
-
-            db.collection("CheckpointReport")
-                    .add(checkpointReport)
-                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                        @Override
-                        public void onSuccess(DocumentReference documentReference) {
-                            Log.d(TAG, "DocumentSnapshot written with ID: " + documentReference.getId());
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.w(TAG, "Error adding document", e);
-                        }
-                    });
+        btnSendReport.setOnClickListener( v -> {
+            //Send images
+            SendImages(finalTaskDocumentId);
+            SendAudioRecordings(finalTaskDocumentId);
+            SendNote();
         });
 
     }
@@ -264,6 +247,73 @@ public class ReportForLocationActivity extends AppCompatActivity implements Recy
     private void EventChangeListener() {
         audioRecordingListAdapter.notifyDataSetChanged();
     }
+
+    private void SendImages(String finalTaskDocumentId){
+        for (int i = 0; i < imagesList.size(); i++) {
+            StorageReference imageRef = fbStorageReference.child(finalTaskDocumentId + '/' + reportDocumentId + '/' + "images/" + UUID.randomUUID().toString());
+            imageReferenceList.add(imageRef.getPath());
+            UploadTask uploadTask = imageRef.putFile(imagesList.get(i));
+
+            uploadTask.addOnSuccessListener(taskSnapshot -> {
+                // TODO Toast?
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    // TODO Toast?
+                }
+            });
+        }
+        Toast.makeText(this, "Report sent", Toast.LENGTH_LONG).show();
+        finish();
+    }
+
+    private void SendAudioRecordings(String finalTaskDocumentId){
+        for (int i = 0; i < audioRecordingList.size(); i++) {
+            File f = new File(getExternalCacheDir().getAbsolutePath() + audioRecordingList.get(i).getFileName());
+            System.out.println(getExternalCacheDir().getAbsolutePath() + audioRecordingList.get(i).getFileName());
+            Uri mAudioUri = FileProvider.getUriForFile(Objects.requireNonNull(getApplicationContext()),
+                    BuildConfig.APPLICATION_ID+ ".provider", f
+            );
+            StorageReference audioRef = fbStorageReference.child(finalTaskDocumentId + '/' + reportDocumentId + '/' + "audio/" + audioRecordingList.get(i).getFileName());
+            audioRecordingReferenceList.add(audioRef.getPath());
+            UploadTask uploadTask = audioRef.putFile(mAudioUri);
+
+            uploadTask.addOnSuccessListener(taskSnapshot -> {
+                // TODO Toast?
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    // TODO Toast?
+                }
+            });
+        }
+    }
+    public static String generateDocumentId() {
+        String uuid = UUID.randomUUID().toString().substring(0,20);
+        return uuid.replaceAll("-", "");
+    }
+
+    private void SendNote(){
+        String note = etNote.getText().toString();
+
+        // creating report with text note
+        // after changing actionList to Tasks change to current checkpoint from db
+
+        Map<String, Object> checkpointReport = new HashMap<>();
+        checkpointReport.put("checkpointNumber", 1);
+        checkpointReport.put("note", note);
+        checkpointReport.put("images", imageReferenceList);
+        checkpointReport.put("recordings", audioRecordingReferenceList);
+
+        fbDb.collection("CheckpointReport").document(reportDocumentId)
+                .set(checkpointReport)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "DocumentSnapshot written");
+                })
+                .addOnFailureListener(e -> Log.w(TAG, "Error adding document", e));
+    }
+//    documentReference -> Log.d(TAG, "DocumentSnapshot written with ID: " + documentReference.toString())
+
 
     //Take picture
     public void dispatchTakePictureIntent() {
@@ -279,11 +329,11 @@ public class ReportForLocationActivity extends AppCompatActivity implements Recy
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
-                mImageUri = FileProvider.getUriForFile(Objects.requireNonNull(getApplicationContext()),
+                imageUri = FileProvider.getUriForFile(Objects.requireNonNull(getApplicationContext()),
                         BuildConfig.APPLICATION_ID+ ".provider",
                         photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mImageUri);
-                mTakePictureLauncher.launch(mImageUri);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+                takePictureLauncher.launch(imageUri);
             }
         }
     }
