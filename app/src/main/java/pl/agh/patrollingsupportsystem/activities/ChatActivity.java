@@ -14,10 +14,8 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
@@ -55,12 +53,24 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Bundle documentExtras1 = getIntent().getExtras();
+        String taskDocumentId = null;
+        if (documentExtras1 != null) {
+            taskDocumentId = documentExtras1.getString("task_document");
+        }
+
+        Bundle documentExtras = getIntent().getExtras();
+        if (documentExtras != null) {
+            coordinator = documentExtras.getString("coordinator");
+        }
+
         mAuth = FirebaseAuth.getInstance();
         binding = ActivityChatBinding.inflate(getLayoutInflater());
         setContentView(R.layout.activity_chat);
         //init();
         chatMessages = new ArrayList<>();
-        chatAdapter = new ChatAdapter(chatMessages, mAuth.getCurrentUser().getUid() /* preferenceManager.getString(Constants.KEY_USER_ID)*/); //Tutaj generalnie userId???
+        chatAdapter = new ChatAdapter(chatMessages, mAuth.getCurrentUser().getUid(), coordinator /* preferenceManager.getString(Constants.KEY_USER_ID)*/); //Tutaj generalnie userId???
         //binding.chatRecyclerView.setAdapter(chatAdapter);
         rvChat = findViewById(R.id.chatRecyclerView);
         rvChat.setAdapter(chatAdapter);
@@ -71,43 +81,37 @@ public class ChatActivity extends AppCompatActivity {
         //binding.layoutSend.setOnClickListener(v -> sendMessage());
         btn = findViewById(R.id.layoutSend);
         tvMessage = findViewById(R.id.inputMessage);
-        btn.setOnClickListener(v -> sendMessage());
+        String finalTaskDocumentId = taskDocumentId;
+        btn.setOnClickListener(v -> sendMessage(finalTaskDocumentId));
         // setListeners();
-        listenMessages();
+        listenMessages(taskDocumentId);
 
-        Bundle documentExtras = getIntent().getExtras();
-        if (documentExtras != null) {
-            coordinator = documentExtras.getString("coordinator");
-        }
-        //tvCoordinatorName.setText("TEST");
-
-        database.collection("User").whereEqualTo("userId", coordinator).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-                    QuerySnapshot querySnapshot = task.getResult();
-                    for (QueryDocumentSnapshot document : querySnapshot) {
-                        String name = document.getString("name");
-                        String surname = document.getString("surname");
-                        tvCoordinatorName.setText(name + " " + surname);
-                    }
-                } else {
-                    Log.d(TAG, "Error getting documents: ", task.getException());
+        database.collection("User").whereEqualTo("userId", coordinator).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                QuerySnapshot querySnapshot = task.getResult();
+                for (QueryDocumentSnapshot document : querySnapshot) {
+                    String name = document.getString("name");
+                    String surname = document.getString("surname");
+                    tvCoordinatorName.setText(name + " " + surname);
                 }
+            } else {
+                Log.d(TAG, "Error getting documents: ", task.getException());
             }
         });
 
     }
 
 
-    private void listenMessages(){
+    private void listenMessages(String taskDocumentID){
         database.collection("Chat")
+                .whereEqualTo("taskId", taskDocumentID)
                 .whereEqualTo("senderId", mAuth.getCurrentUser().getUid())
-                //.whereEqualTo("receiverId", coordinator)
+                .whereEqualTo("receiverId", coordinator)
                 .addSnapshotListener(ev);
         database.collection("Chat")
+                .whereEqualTo("taskId", taskDocumentID)
                 .whereEqualTo("receiverId", mAuth.getCurrentUser().getUid())
-                //.whereEqualTo("senderId", coordinator)
+                .whereEqualTo("senderId", coordinator)
                 .addSnapshotListener(ev);
     }
 
@@ -118,14 +122,15 @@ public class ChatActivity extends AppCompatActivity {
         if(value != null){
             int count = chatMessages.size();
             for(DocumentChange documentChange : value.getDocumentChanges()){
-                //if(documentChange.getType() == DocumentChange.Type.ADDED){
+                if(documentChange.getType() == DocumentChange.Type.ADDED){
                     ChatMessage chatMessage = new ChatMessage();
                     chatMessage.receiverId = documentChange.getDocument().getString("receiverId");
                     chatMessage.senderId = documentChange.getDocument().getString("senderId");
                     chatMessage.message = documentChange.getDocument().getString("message");
+                    chatMessage.taskId = documentChange.getDocument().getString("taskId");
                     chatMessage.dateObject = LocalDateTime.now();
                     chatMessages.add(chatMessage);
-                //}
+                }
             }
             Collections.sort(chatMessages, (obj1, obj2) -> obj1.dateObject.compareTo(obj2.dateObject));
             if (count == 0){
@@ -137,11 +142,12 @@ public class ChatActivity extends AppCompatActivity {
             rvChat.setVisibility(View.VISIBLE);
         }
     };
-    private void sendMessage(){
+    private void sendMessage(String taskDocumentId){
         HashMap<String, Object> message = new HashMap<>();
         message.put("senderId", mAuth.getCurrentUser().getUid());
         message.put("receiverId", coordinator);
         message.put("message", tvMessage.getText().toString());
+        message.put("taskId", taskDocumentId);
         database.collection("Chat")
                 .add(message)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {

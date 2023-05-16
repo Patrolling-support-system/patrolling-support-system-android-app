@@ -69,7 +69,11 @@ public class TaskDetailsActivity extends AppCompatActivity implements RecyclerVi
         fbDb = FirebaseFirestore.getInstance();
 
         //Button onClick functionalities
-        btnCoordinatorChat.setOnClickListener(v -> startActivity(new Intent(TaskDetailsActivity.this, ChatActivity.class).putExtra("coordinator", coordinator)));
+        btnCoordinatorChat.setOnClickListener(v ->
+            startActivity(new Intent(TaskDetailsActivity.this, ChatActivity.class)
+                    .putExtra("coordinator", coordinator)
+                    .putExtra("task_document", finalTaskDocumentId))
+        );
         btnAddReport.setOnClickListener(v -> {
             Intent i = new Intent(TaskDetailsActivity.this, ReportForLocationActivity.class);
             i.putExtra("task_document", finalTaskDocumentId);
@@ -119,9 +123,7 @@ public class TaskDetailsActivity extends AppCompatActivity implements RecyclerVi
                     checkpointAdapter.notifyDataSetChanged();
                 }
             }
-        }).addOnFailureListener(e -> {
-            Toast.makeText(this, "Database issue: " + e.getMessage().toString(), Toast.LENGTH_LONG).show();
-        });
+        }).addOnFailureListener(e -> Toast.makeText(this, "Database issue: " + e.getMessage().toString(), Toast.LENGTH_LONG).show());
 
 
     }

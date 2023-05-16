@@ -17,13 +17,15 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
     private final List<ChatMessage> chatMessages;
     private final String senderId;
+    public final String receiverId;
 
     private static final int VIEW_TYPE_SENT = 1;
     public static final int VIEW_TYPE_RECEIVED = 2;
 
-    public ChatAdapter(List<ChatMessage> chatMessages, String senderId) {
+    public ChatAdapter(List<ChatMessage> chatMessages, String senderId, String receiverId) {
         this.chatMessages = chatMessages;
         this.senderId = senderId;
+        this.receiverId = receiverId;
     }
 
     @NonNull
@@ -58,7 +60,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     public int getItemViewType(int position){
         if(chatMessages.get(position).senderId.equals(senderId)){
             return VIEW_TYPE_SENT;
-        } else {
+        } else{ //chatMessages.get(position).receiverId.equals(coordinator)
             return VIEW_TYPE_RECEIVED;
         }
     }
