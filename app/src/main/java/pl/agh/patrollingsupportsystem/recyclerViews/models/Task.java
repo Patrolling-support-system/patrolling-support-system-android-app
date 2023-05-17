@@ -1,8 +1,8 @@
-package pl.agh.patrollingsupportsystem.recyclerViews.recyclerViewProperties;
+package pl.agh.patrollingsupportsystem.recyclerViews.models;
 
 import com.google.firebase.Timestamp;
 
-public class TaskModel {
+public class Task {
 //Variables and getters for ActionProperties
     String name;
     String location;

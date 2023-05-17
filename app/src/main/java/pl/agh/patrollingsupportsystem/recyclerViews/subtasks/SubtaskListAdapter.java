@@ -1,4 +1,4 @@
-package pl.agh.patrollingsupportsystem.recyclerViews.subtaskListRecyclerView;
+package pl.agh.patrollingsupportsystem.recyclerViews.subtasks;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -14,17 +14,17 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.List;
 
 import pl.agh.patrollingsupportsystem.R;
-import pl.agh.patrollingsupportsystem.recyclerViews.checkpointsRecyclerViewProperties.RecyclerViewInterface;
-import pl.agh.patrollingsupportsystem.recyclerViews.models.SubtaskModelExtended;
+import pl.agh.patrollingsupportsystem.recyclerViews.RecyclerViewInterface;
+import pl.agh.patrollingsupportsystem.recyclerViews.models.SubtaskExtended;
 
 public class SubtaskListAdapter extends RecyclerView.Adapter<SubtaskListAdapter.ViewHolder> {
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     Context context;
     RecyclerViewInterface recyclerViewInterface;
-    List<SubtaskModelExtended> subtasks;
+    List<SubtaskExtended> subtasks;
 
-    public SubtaskListAdapter(Context context, List<SubtaskModelExtended> subtasks, RecyclerViewInterface recyclerViewInterface) {
+    public SubtaskListAdapter(Context context, List<SubtaskExtended> subtasks, RecyclerViewInterface recyclerViewInterface) {
         this.context = context;
         this.subtasks = subtasks;
         this.recyclerViewInterface = recyclerViewInterface;
@@ -39,7 +39,7 @@ public class SubtaskListAdapter extends RecyclerView.Adapter<SubtaskListAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        SubtaskModelExtended currentSubtask = subtasks.get(position);
+        SubtaskExtended currentSubtask = subtasks.get(position);
 
         holder.tvSubtaskName.setText(currentSubtask.getSubtaskName());
         holder.tvSubtaskDescription.setText(currentSubtask.getDescription());

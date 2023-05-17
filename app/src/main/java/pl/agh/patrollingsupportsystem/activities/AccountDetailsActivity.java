@@ -20,9 +20,7 @@ import pl.agh.patrollingsupportsystem.R;
 
 public class AccountDetailsActivity extends AppCompatActivity {
 
-    TextView tvName;
-    TextView tvSurname;
-    TextView tvEmailAddress;
+    TextView tvName, tvSurname, tvEmailAddress;
     Button btnChangePassword;
     FirebaseFirestore fbDb;
     FirebaseUser fbAuth;

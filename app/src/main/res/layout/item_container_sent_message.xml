@@ -6,7 +6,7 @@
     android:padding="4dp">
 
     <TextView
-        android:id="@+id/textMessage"
+        android:id="@+id/textViewMessage"
         app:layout_constraintWidth_max="wrap"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

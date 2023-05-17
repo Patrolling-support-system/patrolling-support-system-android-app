@@ -52,9 +52,6 @@
             android:name="pl.agh.patrollingsupportsystem.activities.ChangePasswordActivity"
             android:exported="false" />
         <activity
-            android:name="pl.agh.patrollingsupportsystem.activities.MainActivity"
-            android:exported="true" />
-        <activity
             android:name="pl.agh.patrollingsupportsystem.activities.TaskListActivity"
             android:exported="false" />
         <activity

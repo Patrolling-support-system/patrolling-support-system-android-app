@@ -4,7 +4,6 @@ import static android.content.ContentValues.TAG;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -27,9 +26,6 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.android.datatransport.BuildConfig;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -48,46 +44,31 @@ import java.util.UUID;
 
 //import pl.agh.patrollingsupportsystem.BuildConfig;
 import pl.agh.patrollingsupportsystem.R;
-import pl.agh.patrollingsupportsystem.recyclerViews.audioRecRecyclerViewProperties.AudioRecordingGeneral;
-import pl.agh.patrollingsupportsystem.recyclerViews.audioRecRecyclerViewProperties.AudioRecordingListAdapter;
-import pl.agh.patrollingsupportsystem.recyclerViews.audioRecRecyclerViewProperties.RecyclerViewInterface;
+import pl.agh.patrollingsupportsystem.recyclerViews.models.AudioRecording;
+import pl.agh.patrollingsupportsystem.recyclerViews.audioRecordings.AudioRecordingListAdapter;
 
-public class ReportForLocationActivity extends AppCompatActivity implements RecyclerViewInterface {
+public class ReportForLocationActivity extends AppCompatActivity {
 
-    Button btnAddImage;
-    Button btnTakePicture;
-    Button btnSendReport;
-    Button sendImagesButton;
-    Button sendTextNote;
+    Button btnAddImage, btnTakePicture, btnSendReport, recordButton, stopButton;
     EditText etNote;
-    LinearLayout linearLayoutGallery;
-
-    ActivityResultLauncher<String> choosePhoto;
-
-    String reportDocumentId;
-
-    Uri imageUri;
+    RecyclerView rvAudioRecordingList;
+    LinearLayout llGallery;
     List<Uri> imagesList = new ArrayList<>();
+    ActivityResultLauncher<String> choosePhoto;
     ActivityResultLauncher<Uri> takePictureLauncher;
-
+    ArrayList<AudioRecording> audioRecordingList;
+    ArrayList<AudioRecording> audioRecordingFiles;
+    List<String> audioRecordingReferenceList;
+    List<String> imageReferenceList;
+    String reportDocumentId;
+    boolean isRecording, isPaused;
+    Uri imageUri;
+    MediaRecorder recorder;
+    AudioRecordingListAdapter audioRecordingListAdapter;
+    FirebaseFirestore fbDb;
     StorageReference fbStorageReference;
 
-    List<String> imageReferenceList;
-    List<String> audioRecordingReferenceList;
 
-
-    private FirebaseFirestore fbDb;
-
-    //Audio
-    MediaRecorder recorder;
-    boolean isRecording = false;
-    boolean isPaused = false;
-
-    //rv
-    RecyclerView rvAudioRecordingList;
-    AudioRecordingListAdapter audioRecordingListAdapter;
-    ArrayList<AudioRecordingGeneral> audioRecordingList = new ArrayList<>();
-    ArrayList<AudioRecordingGeneral> audioRecordingFiles = new ArrayList<>();
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -97,6 +78,7 @@ public class ReportForLocationActivity extends AppCompatActivity implements Recy
 
         reportDocumentId = generateDocumentId();
 
+        //References
         imageReferenceList = new ArrayList<>();
         audioRecordingReferenceList = new ArrayList<>();
 
@@ -107,16 +89,34 @@ public class ReportForLocationActivity extends AppCompatActivity implements Recy
         //Layout elements
         btnAddImage = findViewById(R.id.buttonAddImage);
         btnTakePicture = findViewById(R.id.buttonTakePicture);
+        recordButton = findViewById(R.id.buttonStartPauzeRecording);
+        stopButton = findViewById(R.id.buttonStopRecording);
         etNote = findViewById(R.id.editTextNote);
-        linearLayoutGallery = findViewById(R.id.galleryLinearLayout);
+        llGallery = findViewById(R.id.galleryLinearLayout);
         btnSendReport = findViewById(R.id.buttonSendReport);
 
+        //Audio flags
+        isRecording = false;
+        isPaused = false;
+
+        //Audio lists
+        audioRecordingList = new ArrayList<>();
+        audioRecordingFiles = new ArrayList<>();
+
         //RecycleView for Audio
-        audioRecordingListAdapter = new AudioRecordingListAdapter(this, audioRecordingFiles, this);
+        audioRecordingListAdapter = new AudioRecordingListAdapter(this, audioRecordingFiles);
         rvAudioRecordingList = findViewById(R.id.recyclerViewAudioRecordingList);
         rvAudioRecordingList.setHasFixedSize(true);
         rvAudioRecordingList.setAdapter(audioRecordingListAdapter);
         rvAudioRecordingList.setLayoutManager(new LinearLayoutManager(this));
+
+        //Fetching extras
+        Bundle documentExtras = getIntent().getExtras();
+        String taskDocumentId = null;
+        if (documentExtras != null) {
+            taskDocumentId = documentExtras.getString("task_document");
+        }
+        String finalTaskDocumentId = taskDocumentId; //To use as parameter
 
         //Photo from device
         choosePhoto = registerForActivityResult(
@@ -136,18 +136,16 @@ public class ReportForLocationActivity extends AppCompatActivity implements Recy
                                 .load(result.get(i))
                                 .into(imageView);
 
-                        linearLayoutGallery.addView(imageView);
+                        llGallery.addView(imageView);
                     }
                 });
 
-        btnAddImage.setOnClickListener(v -> {
-            choosePhoto.launch("image/*");
-        });
+        btnAddImage.setOnClickListener(v -> choosePhoto.launch("image/*"));
 
         //Take picture
 
-        takePictureLauncher =
-                registerForActivityResult(new ActivityResultContracts.TakePicture(), result -> {
+        takePictureLauncher = registerForActivityResult(
+                new ActivityResultContracts.TakePicture(), result -> {
                     if (result) {
                         imagesList.add(imageUri);
                         ImageView imageView = new ImageView(ReportForLocationActivity.this);
@@ -161,30 +159,16 @@ public class ReportForLocationActivity extends AppCompatActivity implements Recy
                         Glide.with(ReportForLocationActivity.this)
                                 .load(imageUri)
                                 .into(imageView);
-
-                        linearLayoutGallery.addView(imageView);
+                        llGallery.addView(imageView);
                     } else {
                         Toast.makeText(this, "Picture not taken", Toast.LENGTH_SHORT).show();
                     }
                 });
 
-        btnTakePicture.setOnClickListener(v -> {
-            dispatchTakePictureIntent();
-        });
-
-        //Send images:
-
-        Bundle documentExtras = getIntent().getExtras();
-        String taskDocumentId = null;
-        if (documentExtras != null) {
-            taskDocumentId = documentExtras.getString("task_document");
-        }
-        String finalTaskDocumentId = taskDocumentId;
+        btnTakePicture.setOnClickListener(v -> dispatchTakePictureIntent());
 
         //Audio recording
 
-
-        Button recordButton = findViewById(R.id.buttonStartPauzeRecording);
         recordButton.setOnClickListener(v -> {
             if (!isRecording) {
                 // Start recording
@@ -193,7 +177,7 @@ public class ReportForLocationActivity extends AppCompatActivity implements Recy
                 recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
                 recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
                 String fileNameStr = (new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) +  ".mpeg4");
-                AudioRecordingGeneral fileName = new AudioRecordingGeneral();
+                AudioRecording fileName = new AudioRecording();
                 fileName.setFileName(fileNameStr);
                 audioRecordingList.add(fileName);
                 recorder.setOutputFile(getExternalCacheDir().getAbsolutePath() + fileName.getFileName());
@@ -206,21 +190,21 @@ public class ReportForLocationActivity extends AppCompatActivity implements Recy
                 recorder.start();
                 isRecording = true;
                 isPaused = false;
-                recordButton.setText("Pauza");
+                recordButton.setText("Pause");
             } else if (isRecording && !isPaused) {
                 // Pause recording
                 recorder.pause();
                 isPaused = true;
-                recordButton.setText("Wznów");
+                recordButton.setText("Resume");
             } else if (isRecording && isPaused) {
                 // Resume recording
                 recorder.resume();
                 isPaused = false;
-                recordButton.setText("Pauza");
+                recordButton.setText("Pause");
             }
         });
 
-        Button stopButton = findViewById(R.id.buttonStopRecording);
+
         stopButton.setOnClickListener(v -> {
             if (isRecording) {
                 // Stop recording
@@ -228,7 +212,7 @@ public class ReportForLocationActivity extends AppCompatActivity implements Recy
                 recorder.release();
                 isRecording = false;
                 isPaused = false;
-                recordButton.setText("Nagraj");
+                recordButton.setText("Record");
                 audioRecordingFiles.clear();
                 audioRecordingFiles.addAll(audioRecordingList);
                 EventChangeListener();
@@ -254,13 +238,10 @@ public class ReportForLocationActivity extends AppCompatActivity implements Recy
             imageReferenceList.add(imageRef.getPath());
             UploadTask uploadTask = imageRef.putFile(imagesList.get(i));
 
-            uploadTask.addOnSuccessListener(taskSnapshot -> {
+            uploadTask.addOnSuccessListener(taskSnapshot ->
+                Toast.makeText(this, "Picture not taken", Toast.LENGTH_SHORT).show()
+            ).addOnFailureListener(e -> {
                 // TODO Toast?
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    // TODO Toast?
-                }
             });
         }
         Toast.makeText(this, "Report sent", Toast.LENGTH_LONG).show();
@@ -280,11 +261,8 @@ public class ReportForLocationActivity extends AppCompatActivity implements Recy
 
             uploadTask.addOnSuccessListener(taskSnapshot -> {
                 // TODO Toast?
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    // TODO Toast?
-                }
+            }).addOnFailureListener(e -> {
+                // TODO Toast?
             });
         }
     }
@@ -319,15 +297,12 @@ public class ReportForLocationActivity extends AppCompatActivity implements Recy
     public void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            // Create the File where the photo should go
             File photoFile = null;
             try {
                 photoFile = createImageFile();
             } catch (IOException ex) {
-                // Error occurred while creating the File
                 ex.printStackTrace();
             }
-            // Continue only if the File was successfully created
             if (photoFile != null) {
                 imageUri = FileProvider.getUriForFile(Objects.requireNonNull(getApplicationContext()),
                         BuildConfig.APPLICATION_ID+ ".provider",
@@ -340,23 +315,14 @@ public class ReportForLocationActivity extends AppCompatActivity implements Recy
 
 
     private File createImageFile() throws IOException {
-        // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
+                imageFileName,
+                ".jpg",
+                storageDir
         );
-
-        // Save a file: path for use with ACTION_VIEW intents
-        String currentPhotoPath = image.getAbsolutePath();
         return image;
-    }
-
-    @Override
-    public void onItemClick(int position) {
-
     }
 }

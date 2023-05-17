@@ -1,4 +1,4 @@
-package pl.agh.patrollingsupportsystem.recyclerViews.checkpointsRecyclerViewProperties;
+package pl.agh.patrollingsupportsystem.recyclerViews.checkpoints;
 
 import static android.content.ContentValues.TAG;
 
@@ -22,8 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import pl.agh.patrollingsupportsystem.R;
-import pl.agh.patrollingsupportsystem.recyclerViews.checkpointsRecyclerViewProperties.nestedSubtaskRecyclerViewProperties.SubtaskAdapter;
-import pl.agh.patrollingsupportsystem.recyclerViews.models.SubtaskModelExtended;
+import pl.agh.patrollingsupportsystem.recyclerViews.RecyclerViewInterface;
+import pl.agh.patrollingsupportsystem.recyclerViews.checkpoints.nestedSubtasks.SubtaskAdapter;
+import pl.agh.patrollingsupportsystem.recyclerViews.models.SubtaskExtended;
 
 public class CheckpointAdapter extends RecyclerView.Adapter<CheckpointAdapter.ViewHolder>{
     FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -55,14 +56,14 @@ public class CheckpointAdapter extends RecyclerView.Adapter<CheckpointAdapter.Vi
 
 
         holder.textViewCheckpointName.setText(String.valueOf(checkpoint.getLatitude()) + " | " + String.valueOf(checkpoint.getLongitude()));
-        List<SubtaskModelExtended> subtasks = new ArrayList<>();
+        List<SubtaskExtended> subtasks = new ArrayList<>();
         SubtaskAdapter subtaskAdapter = new SubtaskAdapter(subtasks, holder.rvSubtasks.getContext());
         db.collection("CheckpointSubtasks").whereEqualTo("checkpoint", checkpoint)
                 .get().addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         QuerySnapshot querySnapshot = task.getResult();
                         for (QueryDocumentSnapshot document : querySnapshot) {
-                            SubtaskModelExtended subtask = document.toObject(SubtaskModelExtended.class);
+                            SubtaskExtended subtask = document.toObject(SubtaskExtended.class);
                             subtasks.add(subtask);
                             subtaskAdapter.notifyDataSetChanged();
                             //documentList.add(document.getId());

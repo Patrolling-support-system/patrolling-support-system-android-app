@@ -7,6 +7,5 @@ public class ChatMessage {
     public String receiverId;
     public String message;
     public String taskId;
-    //public String dataTime;
     public LocalDateTime dateObject;
 }

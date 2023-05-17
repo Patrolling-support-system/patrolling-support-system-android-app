@@ -20,8 +20,7 @@ import pl.agh.patrollingsupportsystem.R;
 
 public class ChangePasswordActivity extends AppCompatActivity {
 
-    EditText etOldPassword;
-    EditText etNewPassword;
+    EditText etOldPassword, etNewPassword;
     Button btnConfirmChangePassword;
     FirebaseUser fbUser;
 

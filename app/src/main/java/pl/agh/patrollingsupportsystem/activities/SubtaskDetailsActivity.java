@@ -17,9 +17,7 @@ import pl.agh.patrollingsupportsystem.R;
 public class SubtaskDetailsActivity extends AppCompatActivity {
 
     String subtaskDocumentId;
-    TextView tvSubtaskName;
-    TextView tvSubtaskDescription;
-    TextView tvLocation;
+    TextView tvSubtaskName, tvSubtaskDescription, tvLocation;
 
     FirebaseFirestore fbDb;
 

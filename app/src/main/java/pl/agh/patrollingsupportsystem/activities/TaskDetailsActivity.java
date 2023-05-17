@@ -21,19 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import pl.agh.patrollingsupportsystem.R;
-import pl.agh.patrollingsupportsystem.recyclerViews.checkpointsRecyclerViewProperties.CheckpointAdapter;
-import pl.agh.patrollingsupportsystem.recyclerViews.checkpointsRecyclerViewProperties.RecyclerViewInterface;
+import pl.agh.patrollingsupportsystem.recyclerViews.RecyclerViewInterface;
+import pl.agh.patrollingsupportsystem.recyclerViews.checkpoints.CheckpointAdapter;
 
 public class TaskDetailsActivity extends AppCompatActivity implements RecyclerViewInterface {
 
-    TextView tvTaskName;
-    TextView tvTaskDescription;
-    TextView tvLocation;
-    TextView tvStartDate;
-    TextView tvEndDate;
-    Button btnCoordinatorChat;
-    Button btnAddReport;
-    Button btnMap;
+    TextView tvTaskName, tvTaskDescription, tvLocation, tvStartDate, tvEndDate;
+    Button btnCoordinatorChat, btnAddReport, btnMap;
     String coordinator;
     FirebaseFirestore fbDb;
 

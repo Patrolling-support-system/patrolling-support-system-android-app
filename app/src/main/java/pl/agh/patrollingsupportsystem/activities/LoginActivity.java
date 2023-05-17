@@ -18,8 +18,7 @@ import pl.agh.patrollingsupportsystem.R;
 
 
 public class LoginActivity extends AppCompatActivity {
-    EditText etLoginEmail;
-    EditText etLoginPassword;
+    EditText etLoginEmail, etLoginPassword;
     Button btnLogin;
     FirebaseAuth fbAuth;
 

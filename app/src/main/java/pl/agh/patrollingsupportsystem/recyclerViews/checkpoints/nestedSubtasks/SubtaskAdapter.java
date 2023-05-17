@@ -1,4 +1,4 @@
-package pl.agh.patrollingsupportsystem.recyclerViews.checkpointsRecyclerViewProperties.nestedSubtaskRecyclerViewProperties;
+package pl.agh.patrollingsupportsystem.recyclerViews.checkpoints.nestedSubtasks;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -12,14 +12,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 import pl.agh.patrollingsupportsystem.R;
-import pl.agh.patrollingsupportsystem.recyclerViews.models.SubtaskModelExtended;
+import pl.agh.patrollingsupportsystem.recyclerViews.models.SubtaskExtended;
 
 public class SubtaskAdapter extends RecyclerView.Adapter<SubtaskAdapter.ViewHolder>{
 
-    private List<SubtaskModelExtended> subtasksList;
+    private List<SubtaskExtended> subtasksList;
     Context context;
 
-    public SubtaskAdapter(List<SubtaskModelExtended> subtasksList, Context context) {
+    public SubtaskAdapter(List<SubtaskExtended> subtasksList, Context context) {
         this.subtasksList = subtasksList;
         this.context = context;
     }
@@ -33,7 +33,7 @@ public class SubtaskAdapter extends RecyclerView.Adapter<SubtaskAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        SubtaskModelExtended currentItem = subtasksList.get(position);
+        SubtaskExtended currentItem = subtasksList.get(position);
         holder.tvSubtaskName.setText(currentItem.getSubtaskName());
     }
 

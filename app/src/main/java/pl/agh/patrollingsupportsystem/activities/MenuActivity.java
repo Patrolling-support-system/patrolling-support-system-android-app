@@ -11,8 +11,7 @@ import pl.agh.patrollingsupportsystem.R;
 
 public class MenuActivity extends AppCompatActivity {
 
-    Button btnAccountDetails;
-    Button btnTaskList;
+    Button btnAccountDetails, btnTaskList;
 
     @SuppressLint("MissingInflatedId")
     @Override
