@@ -72,10 +72,7 @@ public class TaskListActivity extends AppCompatActivity implements RecyclerViewI
 
     @Override
     public void onItemClick(int position) {
-        //Open new activity with additional feature
-        Intent i = new Intent(TaskListActivity.this, TaskDetailsActivity.class);
-        i.putExtra("task_document", taskDocumentList.get(position));
-        startActivity(i);
+        startActivity(new Intent(TaskListActivity.this, TaskDetailsActivity.class).putExtra("task_document", taskDocumentList.get(position)));
     }
 }
 

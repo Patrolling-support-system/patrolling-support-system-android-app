@@ -220,7 +220,6 @@ public class ReportForLocationActivity extends AppCompatActivity {
         });
 
         btnSendReport.setOnClickListener( v -> {
-            //Send images
             SendImages(finalTaskDocumentId);
             SendAudioRecordings(finalTaskDocumentId);
             SendNote();

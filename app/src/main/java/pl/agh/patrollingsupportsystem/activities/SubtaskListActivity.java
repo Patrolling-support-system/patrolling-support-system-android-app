@@ -29,6 +29,7 @@ public class SubtaskListActivity extends AppCompatActivity implements RecyclerVi
     FirebaseFirestore fbDb;
     List<SubtaskExtended> subtaskList;
     List<String> subtaskDocumentList;
+    String taskDocumentId;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -40,12 +41,15 @@ public class SubtaskListActivity extends AppCompatActivity implements RecyclerVi
         subtaskList = new ArrayList<>();
         subtaskDocumentList = new ArrayList<>();
 
+        //Extras handling
         Bundle documentExtras = getIntent().getExtras();
         Double latitude = null;
         Double longitude = null;
+        taskDocumentId = null;
         if (documentExtras != null) {
             latitude = documentExtras.getDouble("checkpoint_latitude");
             longitude = documentExtras.getDouble("checkpoint_longitude");
+            taskDocumentId = documentExtras.getString("task_document");
         }
         System.out.println(latitude + " " + longitude);
 
@@ -81,8 +85,8 @@ public class SubtaskListActivity extends AppCompatActivity implements RecyclerVi
 
     @Override
     public void onItemClick(int position) {
-        Intent i = new Intent(SubtaskListActivity.this, SubtaskDetailsActivity.class);
-        i.putExtra("subtask_document", subtaskDocumentList.get(position));
-        startActivity(i);
+        startActivity(new Intent(SubtaskListActivity.this, SubtaskDetailsActivity.class)
+                .putExtra("subtask_document", subtaskDocumentList.get(position))
+                .putExtra("task_document", taskDocumentId));
     }
 }

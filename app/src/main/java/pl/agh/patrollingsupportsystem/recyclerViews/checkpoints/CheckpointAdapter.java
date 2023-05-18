@@ -55,7 +55,7 @@ public class CheckpointAdapter extends RecyclerView.Adapter<CheckpointAdapter.Vi
         holder.rvSubtasks.setHasFixedSize(true);
 
 
-        holder.textViewCheckpointName.setText(String.valueOf(checkpoint.getLatitude()) + " | " + String.valueOf(checkpoint.getLongitude()));
+        holder.textViewCheckpointName.setText(checkpoint.getLatitude() + " | " + checkpoint.getLongitude());
         List<SubtaskExtended> subtasks = new ArrayList<>();
         SubtaskAdapter subtaskAdapter = new SubtaskAdapter(subtasks, holder.rvSubtasks.getContext());
         db.collection("CheckpointSubtasks").whereEqualTo("checkpoint", checkpoint)

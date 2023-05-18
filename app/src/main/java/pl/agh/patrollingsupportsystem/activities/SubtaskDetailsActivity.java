@@ -2,7 +2,9 @@ package pl.agh.patrollingsupportsystem.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,8 +19,9 @@ import pl.agh.patrollingsupportsystem.R;
 public class SubtaskDetailsActivity extends AppCompatActivity {
 
     String subtaskDocumentId;
+    String taskDocumentId;
     TextView tvSubtaskName, tvSubtaskDescription, tvLocation;
-
+    Button btnAddReport;
     FirebaseFirestore fbDb;
 
     @Override
@@ -31,13 +34,24 @@ public class SubtaskDetailsActivity extends AppCompatActivity {
         tvSubtaskName = findViewById(R.id.textViewSubtaskName);
         tvSubtaskDescription = findViewById(R.id.textViewSubtaskDescription);
         tvLocation = findViewById(R.id.textViewLocation);
+        btnAddReport = findViewById(R.id.buttonAddReport);
 
         Bundle documentExtras = getIntent().getExtras();
         subtaskDocumentId = null;
+        taskDocumentId = null;
         if (documentExtras != null) {
             subtaskDocumentId =  documentExtras.getString("subtask_document");
+            taskDocumentId = documentExtras.getString("task_document");
         }
 
+        btnAddReport.setOnClickListener(v ->
+                startActivity(new Intent(SubtaskDetailsActivity.this, ReportForLocationActivity.class)
+                        .putExtra("task_document", taskDocumentId)));
+
+        FirebaseData();
+    }
+
+    public void FirebaseData(){
         fbDb.collection("CheckpointSubtasks").document(subtaskDocumentId)
                 .get()
                 .addOnCompleteListener(task -> {

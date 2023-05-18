@@ -37,13 +37,14 @@ public class ChatActivity extends AppCompatActivity {
     private ActivityChatBinding binding;
     private List<ChatMessage> chatMessages;
     private ChatAdapter chatAdapter;
-    private FirebaseFirestore database;
+    private FirebaseFirestore fbDb;
     FrameLayout btn;
     TextView tvCoordinatorName;
     TextView tvMessage;
     RecyclerView rvChat;
     FirebaseAuth mAuth;
-    String coordinator;
+    String coordinatorId;
+    String taskDocumentId;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -51,25 +52,20 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
 
-        Bundle documentExtras1 = getIntent().getExtras();
-        String taskDocumentId = null;
-        if (documentExtras1 != null) {
-            taskDocumentId = documentExtras1.getString("task_document");
-        }
-
         Bundle documentExtras = getIntent().getExtras();
         if (documentExtras != null) {
-            coordinator = documentExtras.getString("coordinator");
+            taskDocumentId = documentExtras.getString("task_document");
+            coordinatorId = documentExtras.getString("coordinator");
         }
 
         mAuth = FirebaseAuth.getInstance();
         binding = ActivityChatBinding.inflate(getLayoutInflater());
         setContentView(R.layout.activity_chat);
         chatMessages = new ArrayList<>();
-        chatAdapter = new ChatAdapter(chatMessages, mAuth.getCurrentUser().getUid(), coordinator);
+        chatAdapter = new ChatAdapter(chatMessages, mAuth.getCurrentUser().getUid(), coordinatorId);
         rvChat = findViewById(R.id.chatRecyclerView);
         rvChat.setAdapter(chatAdapter);
-        database = FirebaseFirestore.getInstance();
+        fbDb = FirebaseFirestore.getInstance();
         tvCoordinatorName = findViewById(R.id.coordinatorName);
         btn = findViewById(R.id.layoutSend);
         tvMessage = findViewById(R.id.inputMessage);
@@ -77,7 +73,7 @@ public class ChatActivity extends AppCompatActivity {
         btn.setOnClickListener(v -> sendMessage(finalTaskDocumentId));
         listenMessages(taskDocumentId);
 
-        database.collection("User").whereEqualTo("userId", coordinator).get().addOnCompleteListener(task -> {
+        fbDb.collection("User").whereEqualTo("userId", coordinatorId).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 QuerySnapshot querySnapshot = task.getResult();
                 for (QueryDocumentSnapshot document : querySnapshot) {
@@ -94,15 +90,15 @@ public class ChatActivity extends AppCompatActivity {
 
 
     private void listenMessages(String taskDocumentID){
-        database.collection("Chat")
+        fbDb.collection("Chat")
                 .whereEqualTo("taskId", taskDocumentID)
                 .whereEqualTo("senderId", mAuth.getCurrentUser().getUid())
-                .whereEqualTo("receiverId", coordinator)
+                .whereEqualTo("receiverId", coordinatorId)
                 .addSnapshotListener(ev);
-        database.collection("Chat")
+        fbDb.collection("Chat")
                 .whereEqualTo("taskId", taskDocumentID)
                 .whereEqualTo("receiverId", mAuth.getCurrentUser().getUid())
-                .whereEqualTo("senderId", coordinator)
+                .whereEqualTo("senderId", coordinatorId)
                 .addSnapshotListener(ev);
     }
 
@@ -136,10 +132,10 @@ public class ChatActivity extends AppCompatActivity {
     private void sendMessage(String taskDocumentId){
         HashMap<String, Object> message = new HashMap<>();
         message.put("senderId", mAuth.getCurrentUser().getUid());
-        message.put("receiverId", coordinator);
+        message.put("receiverId", coordinatorId);
         message.put("message", tvMessage.getText().toString());
         message.put("taskId", taskDocumentId);
-        database.collection("Chat")
+        fbDb.collection("Chat")
                 .add(message)
                 .addOnSuccessListener(documentReference -> {
                     Log.d(TAG, "DocumentSnapshot written with ID: " + documentReference.getId());
