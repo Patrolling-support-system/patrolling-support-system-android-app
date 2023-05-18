@@ -38,7 +38,7 @@ public class ChatActivity extends AppCompatActivity {
     private List<ChatMessage> chatMessages;
     private ChatAdapter chatAdapter;
     private FirebaseFirestore fbDb;
-    FrameLayout btn;
+    FrameLayout flSendButton;
     TextView tvCoordinatorName;
     TextView tvMessage;
     RecyclerView rvChat;
@@ -50,42 +50,37 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_chat);
 
+        chatMessages = new ArrayList<>();
 
+        //Extras handling
         Bundle documentExtras = getIntent().getExtras();
         if (documentExtras != null) {
             taskDocumentId = documentExtras.getString("task_document");
             coordinatorId = documentExtras.getString("coordinator");
         }
+        String finalTaskDocumentId = taskDocumentId;
 
+        fbDb = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
+
+        //Layout Elements
         binding = ActivityChatBinding.inflate(getLayoutInflater());
-        setContentView(R.layout.activity_chat);
-        chatMessages = new ArrayList<>();
+        flSendButton = findViewById(R.id.layoutSend);
+        tvMessage = findViewById(R.id.inputMessage);
+        tvCoordinatorName = findViewById(R.id.coordinatorName);
+
+        //RecyclerView for messages
         chatAdapter = new ChatAdapter(chatMessages, mAuth.getCurrentUser().getUid(), coordinatorId);
         rvChat = findViewById(R.id.chatRecyclerView);
         rvChat.setAdapter(chatAdapter);
-        fbDb = FirebaseFirestore.getInstance();
-        tvCoordinatorName = findViewById(R.id.coordinatorName);
-        btn = findViewById(R.id.layoutSend);
-        tvMessage = findViewById(R.id.inputMessage);
-        String finalTaskDocumentId = taskDocumentId;
-        btn.setOnClickListener(v -> sendMessage(finalTaskDocumentId));
+
+        flSendButton.setOnClickListener(v -> sendMessage(finalTaskDocumentId));
+
+        coordinatorHeaderSet();
+
         listenMessages(taskDocumentId);
-
-        fbDb.collection("User").whereEqualTo("userId", coordinatorId).get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                QuerySnapshot querySnapshot = task.getResult();
-                for (QueryDocumentSnapshot document : querySnapshot) {
-                    String name = document.getString("name");
-                    String surname = document.getString("surname");
-                    tvCoordinatorName.setText(name + " " + surname);
-                }
-            } else {
-                Log.d(TAG, "Error getting documents: ", task.getException());
-            }
-        });
-
     }
 
 
@@ -100,6 +95,21 @@ public class ChatActivity extends AppCompatActivity {
                 .whereEqualTo("receiverId", mAuth.getCurrentUser().getUid())
                 .whereEqualTo("senderId", coordinatorId)
                 .addSnapshotListener(ev);
+    }
+
+    private void coordinatorHeaderSet(){
+        fbDb.collection("User").whereEqualTo("userId", coordinatorId).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                QuerySnapshot querySnapshot = task.getResult();
+                for (QueryDocumentSnapshot document : querySnapshot) {
+                    String name = document.getString("name");
+                    String surname = document.getString("surname");
+                    tvCoordinatorName.setText(name + " " + surname);
+                }
+            } else {
+                Log.d(TAG, "Error getting documents: ", task.getException());
+            }
+        });
     }
 
     private final EventListener<QuerySnapshot> ev = (value, err) ->{
@@ -141,11 +151,6 @@ public class ChatActivity extends AppCompatActivity {
                     Log.d(TAG, "DocumentSnapshot written with ID: " + documentReference.getId());
                     tvMessage.setText("");
                 })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error adding document", e);
-                    }
-                });
+                .addOnFailureListener(e -> Log.w(TAG, "Error adding document", e));
     }
 }

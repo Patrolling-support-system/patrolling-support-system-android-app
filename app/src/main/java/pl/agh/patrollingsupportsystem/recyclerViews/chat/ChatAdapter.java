@@ -60,7 +60,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     public int getItemViewType(int position){
         if(chatMessages.get(position).senderId.equals(senderId)){
             return VIEW_TYPE_SENT;
-        } else{ //chatMessages.get(position).receiverId.equals(coordinator)
+        } else{
             return VIEW_TYPE_RECEIVED;
         }
     }

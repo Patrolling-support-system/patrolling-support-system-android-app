@@ -70,7 +70,6 @@ public class SubtaskListActivity extends AppCompatActivity implements RecyclerVi
                     }
                     for (DocumentChange dc: value.getDocumentChanges()){
                         if (dc.getType() == DocumentChange.Type.ADDED){
-                            //tvCheckpointCoordinates.setText(dc.getDocument().get("SubtaskName").toString());
                             subtaskList.add(dc.getDocument().toObject(SubtaskExtended.class));
                             subtaskDocumentList.add(dc.getDocument().getId());
                             subtaskListAdapter.notifyDataSetChanged();

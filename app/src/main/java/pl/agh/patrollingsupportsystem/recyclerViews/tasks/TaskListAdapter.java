@@ -54,11 +54,6 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.Action
         TextView tvTaskLocation;
         TextView tvTaskStartDate;
 
-//        public TextView getName() {
-//            return name;
-//        }
-        //IS IT NEEDED LOL?
-
         public ActionViewHolder(@NonNull View itemView, RecyclerViewInterface recyclerViewInterface) {
             super(itemView);
 

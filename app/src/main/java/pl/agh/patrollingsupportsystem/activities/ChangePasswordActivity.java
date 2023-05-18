@@ -24,6 +24,9 @@ public class ChangePasswordActivity extends AppCompatActivity {
     Button btnConfirmChangePassword;
     FirebaseUser fbUser;
 
+    String oldPassword;
+    String newPassword;
+
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -40,8 +43,8 @@ public class ChangePasswordActivity extends AppCompatActivity {
         fbUser = FirebaseAuth.getInstance().getCurrentUser();
 
         btnConfirmChangePassword.setOnClickListener(v -> {
-            String newPassword = String.valueOf(etNewPassword.getText());
-            String oldPassword = String.valueOf(etOldPassword.getText());
+            newPassword = String.valueOf(etNewPassword.getText());
+            oldPassword = String.valueOf(etOldPassword.getText());
             if (TextUtils.isEmpty(oldPassword)) {
                 etOldPassword.setError("Old Password cannot be empty");
                 etOldPassword.requestFocus();
@@ -49,25 +52,29 @@ public class ChangePasswordActivity extends AppCompatActivity {
                 etNewPassword.setError("New Password cannot be empty");
                 etNewPassword.requestFocus();
             } else {
-            AuthCredential credential = EmailAuthProvider.getCredential(fbUser.getEmail(), oldPassword);
 
-            //Reauthentication to change password for logged user
-            fbUser.reauthenticate(credential)
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            fbUser.updatePassword(newPassword).addOnCompleteListener(task1 -> {
-                                if (task1.isSuccessful()) {
-                                    Toast.makeText(ChangePasswordActivity.this, "Password updated successfully", Toast.LENGTH_SHORT);
-                                    startActivity(new Intent(ChangePasswordActivity.this, LoginActivity.class));
-                                } else {
-                                    Toast.makeText(ChangePasswordActivity.this, "Password update failed", Toast.LENGTH_LONG);
-                                }
-                            });
-                        } else {
-                            Toast.makeText(ChangePasswordActivity.this, "Authentication error", Toast.LENGTH_LONG);
-                        }
-                    });
+            Reauthentication();
             }
         });
+    }
+    
+    private void Reauthentication(){
+        AuthCredential credential = EmailAuthProvider.getCredential(fbUser.getEmail(), oldPassword);
+        fbUser.reauthenticate(credential)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        fbUser.updatePassword(newPassword).addOnCompleteListener(task1 -> {
+                            if (task1.isSuccessful()) {
+                                Toast.makeText(ChangePasswordActivity.this, "Password updated successfully", Toast.LENGTH_SHORT);
+                                finish();
+                                startActivity(new Intent(ChangePasswordActivity.this, LoginActivity.class));
+                            } else {
+                                Toast.makeText(ChangePasswordActivity.this, "Password update failed", Toast.LENGTH_LONG);
+                            }
+                        });
+                    } else {
+                        Toast.makeText(ChangePasswordActivity.this, "Authentication error", Toast.LENGTH_LONG);
+                    }
+                });
     }
 }

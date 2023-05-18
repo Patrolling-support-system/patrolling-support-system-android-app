@@ -32,12 +32,12 @@ public class TaskDetailsActivity extends AppCompatActivity implements RecyclerVi
     Button btnCoordinatorChat, btnAddReport, btnMap;
     String coordinator;
     FirebaseFirestore fbDb;
+    String taskDocumentIdExtras;
 
     //Used for RecyclerView
     RecyclerView rvCheckpointList;
     CheckpointAdapter checkpointAdapter;
     List<GeoPoint> checkpointList;
-    String taskDocumentIdExtras;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -67,14 +67,14 @@ public class TaskDetailsActivity extends AppCompatActivity implements RecyclerVi
 
         fbDb = FirebaseFirestore.getInstance();
 
-        //Button onClick functionalities
         btnCoordinatorChat.setOnClickListener(v ->
             startActivity(new Intent(TaskDetailsActivity.this, ChatActivity.class)
                     .putExtra("coordinator", coordinator)
                     .putExtra("task_document", finalTaskDocumentId))
         );
         btnAddReport.setOnClickListener(v ->
-            startActivity(new Intent(TaskDetailsActivity.this, ReportForLocationActivity.class).putExtra("task_document", finalTaskDocumentId))
+            startActivity(new Intent(TaskDetailsActivity.this, ReportForLocationActivity.class)
+                    .putExtra("task_document", finalTaskDocumentId))
         );
         btnMap.setOnClickListener(v -> startActivity(new Intent(TaskDetailsActivity.this, MapsActivityCurrentPlace.class)));
 

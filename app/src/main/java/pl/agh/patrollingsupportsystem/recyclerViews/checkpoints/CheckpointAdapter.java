@@ -27,9 +27,10 @@ import pl.agh.patrollingsupportsystem.recyclerViews.checkpoints.nestedSubtasks.S
 import pl.agh.patrollingsupportsystem.recyclerViews.models.SubtaskExtended;
 
 public class CheckpointAdapter extends RecyclerView.Adapter<CheckpointAdapter.ViewHolder>{
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    FirebaseFirestore fbDb = FirebaseFirestore.getInstance();
     Context context;
     RecyclerViewInterface recyclerViewInterface;
+    private List<GeoPoint> checkpoints;
 
 
     public CheckpointAdapter(Context context, List<GeoPoint> checkpoints, RecyclerViewInterface recyclerViewInterface) {
@@ -38,8 +39,6 @@ public class CheckpointAdapter extends RecyclerView.Adapter<CheckpointAdapter.Vi
         this.recyclerViewInterface = recyclerViewInterface;
     }
 
-
-    private List<GeoPoint> checkpoints;
 
     @NonNull
     @Override
@@ -58,7 +57,7 @@ public class CheckpointAdapter extends RecyclerView.Adapter<CheckpointAdapter.Vi
         holder.textViewCheckpointName.setText(checkpoint.getLatitude() + " | " + checkpoint.getLongitude());
         List<SubtaskExtended> subtasks = new ArrayList<>();
         SubtaskAdapter subtaskAdapter = new SubtaskAdapter(subtasks, holder.rvSubtasks.getContext());
-        db.collection("CheckpointSubtasks").whereEqualTo("checkpoint", checkpoint)
+        fbDb.collection("CheckpointSubtasks").whereEqualTo("checkpoint", checkpoint)
                 .get().addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         QuerySnapshot querySnapshot = task.getResult();
@@ -66,7 +65,6 @@ public class CheckpointAdapter extends RecyclerView.Adapter<CheckpointAdapter.Vi
                             SubtaskExtended subtask = document.toObject(SubtaskExtended.class);
                             subtasks.add(subtask);
                             subtaskAdapter.notifyDataSetChanged();
-                            //documentList.add(document.getId());
                         }
                     } else {
                         Log.d(TAG, "Error getting documents: ", task.getException());

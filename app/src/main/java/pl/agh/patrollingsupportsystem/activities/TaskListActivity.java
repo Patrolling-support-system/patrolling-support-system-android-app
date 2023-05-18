@@ -28,8 +28,6 @@ public class TaskListActivity extends AppCompatActivity implements RecyclerViewI
     ArrayList<Task> taskList;
     ArrayList<String> taskDocumentList;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,7 +70,8 @@ public class TaskListActivity extends AppCompatActivity implements RecyclerViewI
 
     @Override
     public void onItemClick(int position) {
-        startActivity(new Intent(TaskListActivity.this, TaskDetailsActivity.class).putExtra("task_document", taskDocumentList.get(position)));
+        startActivity(new Intent(TaskListActivity.this, TaskDetailsActivity.class)
+                .putExtra("task_document", taskDocumentList.get(position)));
     }
 }
 

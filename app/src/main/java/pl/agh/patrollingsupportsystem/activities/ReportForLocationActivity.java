@@ -237,11 +237,9 @@ public class ReportForLocationActivity extends AppCompatActivity {
             imageReferenceList.add(imageRef.getPath());
             UploadTask uploadTask = imageRef.putFile(imagesList.get(i));
 
-            uploadTask.addOnSuccessListener(taskSnapshot ->
-                Toast.makeText(this, "Picture not taken", Toast.LENGTH_SHORT).show()
-            ).addOnFailureListener(e -> {
-                // TODO Toast?
-            });
+            uploadTask
+                    .addOnSuccessListener(taskSnapshot -> Log.d(TAG, "Images uploaded for upload task: " + taskSnapshot.getTask()))
+                    .addOnFailureListener(e -> Log.w(TAG, "Error images upload: ", e));
         }
         Toast.makeText(this, "Report sent", Toast.LENGTH_LONG).show();
         finish();
@@ -258,11 +256,9 @@ public class ReportForLocationActivity extends AppCompatActivity {
             audioRecordingReferenceList.add(audioRef.getPath());
             UploadTask uploadTask = audioRef.putFile(mAudioUri);
 
-            uploadTask.addOnSuccessListener(taskSnapshot -> {
-                // TODO Toast?
-            }).addOnFailureListener(e -> {
-                // TODO Toast?
-            });
+            uploadTask
+                    .addOnSuccessListener(taskSnapshot -> Log.d(TAG, "Audio recordings uploaded for upload task: " + taskSnapshot.getTask()))
+                    .addOnFailureListener(e -> Log.w(TAG, "Error audio recording upload: ", e));
         }
     }
     public static String generateDocumentId() {
@@ -289,7 +285,6 @@ public class ReportForLocationActivity extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> Log.w(TAG, "Error adding document", e));
     }
-//    documentReference -> Log.d(TAG, "DocumentSnapshot written with ID: " + documentReference.toString())
 
 
     //Take picture
@@ -312,7 +307,6 @@ public class ReportForLocationActivity extends AppCompatActivity {
         }
     }
 
-
     private File createImageFile() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
@@ -322,6 +316,7 @@ public class ReportForLocationActivity extends AppCompatActivity {
                 ".jpg",
                 storageDir
         );
+
         return image;
     }
 }
