@@ -14,6 +14,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.EventListener;
@@ -145,6 +146,7 @@ public class ChatActivity extends AppCompatActivity {
         message.put("receiverId", coordinatorId);
         message.put("message", tvMessage.getText().toString());
         message.put("taskId", taskDocumentId);
+        message.put("date", Timestamp.now());
         fbDb.collection("Chat")
                 .add(message)
                 .addOnSuccessListener(documentReference -> {
