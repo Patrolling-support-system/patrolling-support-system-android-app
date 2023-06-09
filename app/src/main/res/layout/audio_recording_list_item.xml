@@ -18,7 +18,7 @@
         android:paddingBottom="5dp">
 
         <TextView
-            android:id="@+id/tvFileName"
+            android:id="@+id/textViewFileName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/signika_negative"

@@ -1,4 +1,4 @@
-package pl.agh.patrollingsupportsystem.recyclerViews.recyclerViewProperties;
+package pl.agh.patrollingsupportsystem.recyclerViews.tasks;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -13,14 +13,15 @@ import java.util.ArrayList;
 
 import pl.agh.patrollingsupportsystem.R;
 import pl.agh.patrollingsupportsystem.recyclerViews.RecyclerViewInterface;
+import pl.agh.patrollingsupportsystem.recyclerViews.models.Task;
 
 public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.ActionViewHolder> {
     Context context;
-    ArrayList<TaskModel> taskList;
+    ArrayList<Task> taskList;
     RecyclerViewInterface recyclerViewInterface;
 
 
-    public TaskListAdapter(Context context, ArrayList<TaskModel> taskList, RecyclerViewInterface recyclerViewInterface) {
+    public TaskListAdapter(Context context, ArrayList<Task> taskList, RecyclerViewInterface recyclerViewInterface) {
         this.context = context;
         this.taskList = taskList;
         this.recyclerViewInterface = recyclerViewInterface;
@@ -35,7 +36,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.Action
 
     @Override
     public void onBindViewHolder(@NonNull ActionViewHolder holder, int position) {
-        TaskModel taskModel = taskList.get(position);
+        Task taskModel = taskList.get(position);
         holder.tvTaskName.setText(taskModel.getName());
         holder.tvTaskLocation.setText(taskModel.getLocation());
         holder.tvTaskStartDate.setText(taskModel.getStartDate().toDate().toString());
@@ -52,11 +53,6 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.Action
         TextView tvTaskName;
         TextView tvTaskLocation;
         TextView tvTaskStartDate;
-
-//        public TextView getName() {
-//            return name;
-//        }
-        //IS IT NEEDED LOL?
 
         public ActionViewHolder(@NonNull View itemView, RecyclerViewInterface recyclerViewInterface) {
             super(itemView);

@@ -15,8 +15,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 
 import pl.agh.patrollingsupportsystem.R;
-import pl.agh.patrollingsupportsystem.recyclerViews.recyclerViewProperties.TaskModel;
-import pl.agh.patrollingsupportsystem.recyclerViews.recyclerViewProperties.TaskListAdapter;
+import pl.agh.patrollingsupportsystem.recyclerViews.models.Task;
+import pl.agh.patrollingsupportsystem.recyclerViews.tasks.TaskListAdapter;
 import pl.agh.patrollingsupportsystem.recyclerViews.RecyclerViewInterface;
 
 public class TaskListActivity extends AppCompatActivity implements RecyclerViewInterface {
@@ -25,10 +25,8 @@ public class TaskListActivity extends AppCompatActivity implements RecyclerViewI
     FirebaseFirestore fbDb;
     FirebaseAuth fbAuth;
     TaskListAdapter taskListAdapter;
-    ArrayList<TaskModel> taskList;
+    ArrayList<Task> taskList;
     ArrayList<String> taskDocumentList;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +60,7 @@ public class TaskListActivity extends AppCompatActivity implements RecyclerViewI
                     }
                     for (DocumentChange dc: value.getDocumentChanges()){
                         if (dc.getType() == DocumentChange.Type.ADDED){
-                            taskList.add(dc.getDocument().toObject(TaskModel.class));
+                            taskList.add(dc.getDocument().toObject(Task.class));
                             taskDocumentList.add(dc.getDocument().getId());
                         }
                         taskListAdapter.notifyDataSetChanged();
@@ -72,10 +70,8 @@ public class TaskListActivity extends AppCompatActivity implements RecyclerViewI
 
     @Override
     public void onItemClick(int position) {
-        //Open new activity with additional feature
-        Intent i = new Intent(TaskListActivity.this, TaskDetailsActivity.class);
-        i.putExtra("task_document", taskDocumentList.get(position));
-        startActivity(i);
+        startActivity(new Intent(TaskListActivity.this, TaskDetailsActivity.class)
+                .putExtra("task_document", taskDocumentList.get(position)));
     }
 }
 

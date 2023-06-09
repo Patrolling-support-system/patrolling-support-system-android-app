@@ -1,7 +1,8 @@
 package pl.agh.patrollingsupportsystem.activities;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.ViewCompat;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -12,7 +13,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -23,21 +23,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import pl.agh.patrollingsupportsystem.R;
-import pl.agh.patrollingsupportsystem.recyclerViews.checkpointsRecyclerViewProperties.CheckpointAdapter;
-import pl.agh.patrollingsupportsystem.recyclerViews.checkpointsRecyclerViewProperties.RecyclerViewInterface;
+import pl.agh.patrollingsupportsystem.recyclerViews.RecyclerViewInterface;
+import pl.agh.patrollingsupportsystem.recyclerViews.checkpoints.CheckpointAdapter;
 
 public class TaskDetailsActivity extends AppCompatActivity implements RecyclerViewInterface {
 
-    TextView tvTaskName;
-    TextView tvTaskDescription;
-    TextView tvLocation;
-    TextView tvStartDate;
-    TextView tvEndDate;
-    Button btnCoordinatorChat;
-    Button btnAddReport;
-    Button btnMap;
+    TextView tvTaskName, tvTaskDescription, tvLocation, tvStartDate, tvEndDate;
+    Button btnCoordinatorChat, btnAddReport, btnMap;
     String coordinator;
     FirebaseFirestore fbDb;
+    String taskDocumentIdExtras;
 
     //Used for RecyclerView
     RecyclerView rvCheckpointList;
@@ -50,12 +45,15 @@ public class TaskDetailsActivity extends AppCompatActivity implements RecyclerVi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task_details);
 
-        //Catch extras
+
+        //Catch and set extras
         Bundle documentExtras = getIntent().getExtras();
         String taskDocumentId = null;
         if (documentExtras != null) {
             taskDocumentId = documentExtras.getString("task_document");
         }
+        String finalTaskDocumentId = taskDocumentId;
+        taskDocumentIdExtras = taskDocumentId;
 
         //Layout elements
         tvTaskName = findViewById(R.id.textViewTaskName);
@@ -69,9 +67,15 @@ public class TaskDetailsActivity extends AppCompatActivity implements RecyclerVi
 
         fbDb = FirebaseFirestore.getInstance();
 
-        //Button onClick functionalities
-        btnCoordinatorChat.setOnClickListener(v -> startActivity(new Intent(TaskDetailsActivity.this, ChatActivity.class).putExtra("coordinator", coordinator)));
-        btnAddReport.setOnClickListener(v -> startActivity(new Intent(TaskDetailsActivity.this, ReportForLocationActivity.class)));
+        btnCoordinatorChat.setOnClickListener(v ->
+            startActivity(new Intent(TaskDetailsActivity.this, ChatActivity.class)
+                    .putExtra("coordinator", coordinator)
+                    .putExtra("task_document", finalTaskDocumentId))
+        );
+        btnAddReport.setOnClickListener(v ->
+            startActivity(new Intent(TaskDetailsActivity.this, ReportForLocationActivity.class)
+                    .putExtra("task_document", finalTaskDocumentId))
+        );
         btnMap.setOnClickListener(v -> startActivity(new Intent(TaskDetailsActivity.this, MapsActivityCurrentPlace.class)));
 
 
@@ -98,6 +102,7 @@ public class TaskDetailsActivity extends AppCompatActivity implements RecyclerVi
 
         //RecyclerCheckpointView
         rvCheckpointList = findViewById(R.id.recyclerViewCheckpointList);
+        ViewCompat.setNestedScrollingEnabled(rvCheckpointList, false);
         checkpointList = new ArrayList<>();
         checkpointAdapter = new CheckpointAdapter(this, checkpointList, this);
         rvCheckpointList.setAdapter(checkpointAdapter);
@@ -116,18 +121,16 @@ public class TaskDetailsActivity extends AppCompatActivity implements RecyclerVi
                     checkpointAdapter.notifyDataSetChanged();
                 }
             }
-        }).addOnFailureListener(e -> {
-            Toast.makeText(this, "Database issue: " + e.getMessage().toString(), Toast.LENGTH_LONG).show();
-        });
+        }).addOnFailureListener(e -> Toast.makeText(this, "Database issue: " + e.getMessage(), Toast.LENGTH_LONG).show());
 
 
     }
 
     @Override
     public void onItemClick(int position) {
-        Intent i = new Intent(TaskDetailsActivity.this, SubtaskActivity.class);
-        i.putExtra("checkpoint_latitude", checkpointList.get(position).getLatitude());
-        i.putExtra("checkpoint_longitude", checkpointList.get(position).getLongitude());
-        startActivity(i);
+        startActivity(new Intent(TaskDetailsActivity.this, SubtaskListActivity.class)
+                .putExtra("checkpoint_latitude", checkpointList.get(position).getLatitude())
+                .putExtra("checkpoint_longitude", checkpointList.get(position).getLongitude())
+                .putExtra("task_document", taskDocumentIdExtras));
     }
 }

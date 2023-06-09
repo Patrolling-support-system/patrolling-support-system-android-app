@@ -1,17 +1,17 @@
 package pl.agh.patrollingsupportsystem.recyclerViews.models;
 
-public class SubtaskModelExtended {
+public class SubtaskExtended {
     String description;
     String subtaskName;
 
-    public SubtaskModelExtended() {
+    public SubtaskExtended() {
     }
 
-    public SubtaskModelExtended(String subtaskName) {
+    public SubtaskExtended(String subtaskName) {
         this.subtaskName = subtaskName;
     }
 
-    public SubtaskModelExtended(String description, String subtaskName) {
+    public SubtaskExtended(String description, String subtaskName) {
         this.description = description;
         this.subtaskName = subtaskName;
     }

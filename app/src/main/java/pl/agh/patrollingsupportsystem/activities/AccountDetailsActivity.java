@@ -20,12 +20,11 @@ import pl.agh.patrollingsupportsystem.R;
 
 public class AccountDetailsActivity extends AppCompatActivity {
 
-    TextView tvName;
-    TextView tvSurname;
-    TextView tvEmailAddress;
-    Button btnChangePassword;
+    TextView tvName, tvSurname, tvEmailAddress;
+    Button btnChangePassword, btnLogout;
     FirebaseFirestore fbDb;
-    FirebaseUser fbAuth;
+    FirebaseAuth fbAuth;
+    FirebaseUser fbUser;
 
     String userId;
     String userEmailAddress;
@@ -41,14 +40,16 @@ public class AccountDetailsActivity extends AppCompatActivity {
         tvSurname = findViewById(R.id.textViewSurname);
         tvEmailAddress = findViewById(R.id.textViewEmailAddress);
         btnChangePassword = findViewById(R.id.buttonChangePassword);
+        btnLogout = findViewById(R.id.buttonLogout);
 
         //Firebase instance and auth
         fbDb = FirebaseFirestore.getInstance();
-        fbAuth = FirebaseAuth.getInstance().getCurrentUser();
+        fbAuth = FirebaseAuth.getInstance();
+        fbUser = fbAuth.getCurrentUser();
 
         //User information
         userId = fbAuth.getUid();
-        userEmailAddress = fbAuth.getEmail();
+        userEmailAddress = fbUser.getEmail();
 
         //Values for fields
         tvEmailAddress.setText(userEmailAddress);
@@ -70,5 +71,10 @@ public class AccountDetailsActivity extends AppCompatActivity {
         });
 
         btnChangePassword.setOnClickListener(v -> startActivity(new Intent(AccountDetailsActivity.this, ChangePasswordActivity.class)));
+        btnLogout.setOnClickListener(v -> {
+            fbAuth.signOut();
+            finish();
+            startActivity(new Intent(AccountDetailsActivity.this, LoginActivity.class));
+        });
     }
 }

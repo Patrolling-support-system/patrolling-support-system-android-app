@@ -18,17 +18,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import pl.agh.patrollingsupportsystem.R;
-import pl.agh.patrollingsupportsystem.recyclerViews.checkpointsRecyclerViewProperties.RecyclerViewInterface;
-import pl.agh.patrollingsupportsystem.recyclerViews.models.SubtaskModelExtended;
-import pl.agh.patrollingsupportsystem.recyclerViews.subtaskListRecyclerView.SubtaskListAdapter;
+import pl.agh.patrollingsupportsystem.recyclerViews.RecyclerViewInterface;
+import pl.agh.patrollingsupportsystem.recyclerViews.models.SubtaskExtended;
+import pl.agh.patrollingsupportsystem.recyclerViews.subtasks.SubtaskListAdapter;
 
-public class SubtaskActivity extends AppCompatActivity implements RecyclerViewInterface {
+public class SubtaskListActivity extends AppCompatActivity implements RecyclerViewInterface {
 
     TextView tvCheckpointCoordinates;
     RecyclerView rvSubtasks;
-    FirebaseFirestore db;
-    List<SubtaskModelExtended> subtasks;
-    List<String> documents;
+    FirebaseFirestore fbDb;
+    List<SubtaskExtended> subtaskList;
+    List<String> subtaskDocumentList;
+    String taskDocumentId;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -36,29 +37,32 @@ public class SubtaskActivity extends AppCompatActivity implements RecyclerViewIn
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_subtask);
 
-        db = FirebaseFirestore.getInstance();
-        subtasks = new ArrayList<>();
-        documents = new ArrayList<>();
+        fbDb = FirebaseFirestore.getInstance();
+        subtaskList = new ArrayList<>();
+        subtaskDocumentList = new ArrayList<>();
 
+        //Extras handling
         Bundle documentExtras = getIntent().getExtras();
         Double latitude = null;
         Double longitude = null;
+        taskDocumentId = null;
         if (documentExtras != null) {
             latitude = documentExtras.getDouble("checkpoint_latitude");
             longitude = documentExtras.getDouble("checkpoint_longitude");
+            taskDocumentId = documentExtras.getString("task_document");
         }
         System.out.println(latitude + " " + longitude);
 
         rvSubtasks = findViewById(R.id.recyclerViewSubtaskList);
         rvSubtasks.setLayoutManager(new LinearLayoutManager(this));
-        SubtaskListAdapter subtaskListAdapter = new SubtaskListAdapter( this, subtasks, this);
+        SubtaskListAdapter subtaskListAdapter = new SubtaskListAdapter( this, subtaskList, this);
 
         tvCheckpointCoordinates = findViewById(R.id.textViewCheckpointCoordinates);
         tvCheckpointCoordinates.setText(latitude + " | " + longitude);
         GeoPoint checkpoint = new GeoPoint(latitude, longitude);
 
 
-        db.collection("CheckpointSubtasks").whereEqualTo("checkpoint", checkpoint)
+        fbDb.collection("CheckpointSubtasks").whereEqualTo("checkpoint", checkpoint)
                 .addSnapshotListener((value, error) -> {
                     if (error != null){
                         Log.e("Firestore error ", error.getMessage());
@@ -66,9 +70,8 @@ public class SubtaskActivity extends AppCompatActivity implements RecyclerViewIn
                     }
                     for (DocumentChange dc: value.getDocumentChanges()){
                         if (dc.getType() == DocumentChange.Type.ADDED){
-                            //tvCheckpointCoordinates.setText(dc.getDocument().get("SubtaskName").toString());
-                            subtasks.add(dc.getDocument().toObject(SubtaskModelExtended.class));
-                            documents.add(dc.getDocument().getId());
+                            subtaskList.add(dc.getDocument().toObject(SubtaskExtended.class));
+                            subtaskDocumentList.add(dc.getDocument().getId());
                             subtaskListAdapter.notifyDataSetChanged();
                         }
 
@@ -81,8 +84,8 @@ public class SubtaskActivity extends AppCompatActivity implements RecyclerViewIn
 
     @Override
     public void onItemClick(int position) {
-        Intent i = new Intent(SubtaskActivity.this, SubtaskDetailsActivity.class);
-        i.putExtra("subtask_document", documents.get(position));
-        startActivity(i);
+        startActivity(new Intent(SubtaskListActivity.this, SubtaskDetailsActivity.class)
+                .putExtra("subtask_document", subtaskDocumentList.get(position))
+                .putExtra("task_document", taskDocumentId));
     }
 }

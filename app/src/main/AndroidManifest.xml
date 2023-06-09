@@ -24,19 +24,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PatrollingSupportSystem"
         tools:targetApi="31">
-        <activity
-            android:name="pl.agh.patrollingsupportsystem.activities.SubtaskDetailsActivity"
-            android:exported="false" />
-        <activity
-            android:name="pl.agh.patrollingsupportsystem.activities.SubtaskActivity"
-            android:exported="false" />
-        <activity
-            android:name="pl.agh.patrollingsupportsystem.activities.ChatActivity"
-            android:exported="false" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.provider"
+            android:authorities="com.google.android.datatransport.provider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
@@ -45,14 +36,21 @@
         </provider>
 
         <activity
+            android:name="pl.agh.patrollingsupportsystem.activities.SubtaskDetailsActivity"
+            android:exported="false" />
+        <activity
+            android:name="pl.agh.patrollingsupportsystem.activities.SubtaskListActivity"
+            android:exported="false" />
+        <activity
+            android:name="pl.agh.patrollingsupportsystem.activities.ChatActivity"
+            android:exported="false" />
+
+        <activity
             android:name="pl.agh.patrollingsupportsystem.activities.ReportForLocationActivity"
             android:exported="false" />
         <activity
             android:name="pl.agh.patrollingsupportsystem.activities.ChangePasswordActivity"
             android:exported="false" />
-        <activity
-            android:name="pl.agh.patrollingsupportsystem.activities.MainActivity"
-            android:exported="true" />
         <activity
             android:name="pl.agh.patrollingsupportsystem.activities.TaskListActivity"
             android:exported="false" />
