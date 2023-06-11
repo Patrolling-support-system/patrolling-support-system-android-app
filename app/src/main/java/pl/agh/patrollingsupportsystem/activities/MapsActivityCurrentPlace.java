@@ -1,11 +1,14 @@
 package pl.agh.patrollingsupportsystem.activities;
 
+import static android.content.ContentValues.TAG;
+
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
-
+import android.os.Looper;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,29 +16,36 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.Granularity;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.net.PlacesClient;
-import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.Timestamp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.IntStream;
+import java.util.Map;
 
 import pl.agh.patrollingsupportsystem.BuildConfig;
 import pl.agh.patrollingsupportsystem.R;
@@ -43,10 +53,7 @@ import pl.agh.patrollingsupportsystem.R;
 public class MapsActivityCurrentPlace extends AppCompatActivity
         implements OnMapReadyCallback, ActivityCompat.OnRequestPermissionsResultCallback {
 
-    private static final String TAG = MapsActivityCurrentPlace.class.getSimpleName();
     private GoogleMap map;
-    private CameraPosition cameraPosition;
-    private PlacesClient placesClient;
     private FusedLocationProviderClient fusedLocationProviderClient;
     private FirebaseFirestore db;
 
@@ -54,124 +61,142 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
     // not granted.
     private final LatLng defaultLocation = new LatLng(50.06192492003556, 19.93918752197243);
     private static final int DEFAULT_ZOOM = 15;
-    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
-    private boolean locationPermissionGranted;
-    private Location lastKnownLocation;
-    private static final String KEY_CAMERA_POSITION = "camera_position";
-    private static final String KEY_LOCATION = "location";
+    private static final int PERMISSION_FINE_LOCATION = 1;
+    private LocationRequest locationRequest;
+    private static final long MIN_TIME = 60000;
+    private static final long MIN_DISTANCE = 5;
+    LocationCallback locationCallback;
+    private String taskId;
 
 
+    @SuppressLint("MissingPermission")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-//        if (savedInstanceState != null) {
-//            lastKnownLocation = savedInstanceState.getParcelable(KEY_LOCATION);
-//            cameraPosition = savedInstanceState.getParcelable(KEY_CAMERA_POSITION);
-//        }
+        Bundle documentExtras = getIntent().getExtras();
+        if (documentExtras != null) {
+            taskId = documentExtras.getString("taskId");
+        }
 
         setContentView(R.layout.activity_map);
 
-        Places.initialize(getApplicationContext(), BuildConfig.MAPS_API_KEY);
-        placesClient = Places.createClient(this);
+        db = FirebaseFirestore.getInstance();
+
+
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        Places.initialize(getApplicationContext(), BuildConfig.MAPS_API_KEY);
+        locationRequest = getLocationRequest();
+
+        beginUpdates();
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
 
-        db = FirebaseFirestore.getInstance();
-
+        assert mapFragment != null;
         mapFragment.getMapAsync(this);
-
-    }
-
-    /**
-     * Saves the state of the map when the activity is paused.
-     */
-    @Override
-    protected void onSaveInstanceState(@NonNull Bundle outState) {
-        if (map != null) {
-            outState.putParcelable(KEY_CAMERA_POSITION, map.getCameraPosition());
-            outState.putParcelable(KEY_LOCATION, lastKnownLocation);
-        }
-        super.onSaveInstanceState(outState);
     }
 
     @SuppressLint("MissingPermission")
-    @Override
-    public void onMapReady(@NonNull GoogleMap map) {
-        this.map = map;
-
-        // for now we get checkpoints from same task, need change
-        CollectionReference collectionRef = db.collection("Tasks");
-        Query query = collectionRef.whereEqualTo("location", "Stóg siana");
-        query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+    private void beginUpdates() {
+        locationCallback = new LocationCallback() {
             @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-
-                        List<GeoPoint> list = (List<GeoPoint>) document.get("checkpoints");
-                        IntStream.range(0, list.size()).forEach(index-> {
-                            map.addMarker(new MarkerOptions()
-                                .position(new LatLng(list.get(index).getLatitude(), list.get(index).getLongitude()))
-                                .alpha(0.9F)
-                                .title(String.valueOf(index))
-                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))).showInfoWindow();
-                                });
-                    }
-                } else {
-                    Log.d(TAG, "Error getting user document: ", task.getException());
+            public void onLocationResult(@NonNull LocationResult locationResult) {
+                for (Location location : locationResult.getLocations()) {
+                    updateLocation(location);
                 }
             }
-        });
-
-        getLocationPermission();
-        updateLocationUI();
-        getDeviceLocation();
+        };
+        fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
     }
 
     @SuppressLint("MissingPermission")
-    private void getDeviceLocation() {
-        try {
-            if (locationPermissionGranted) {
-                Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
-                locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Location> task) {
-                        if (task.isSuccessful()) {
-                            lastKnownLocation = task.getResult();
-                            if (lastKnownLocation != null) {
-                                map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                        new LatLng(lastKnownLocation.getLatitude(),
-                                                lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
-                            }
-                        } else {
-                            Log.d(TAG, "Current location is null. Using defaults.");
-                            Log.e(TAG, "Exception: %s", task.getException());
-                            map.moveCamera(CameraUpdateFactory
-                                    .newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
-                            map.getUiSettings().setMyLocationButtonEnabled(false);
-                        }
-                    }
-                });
-            }
-        } catch (SecurityException e)  {
-            Log.e("Exception: %s", e.getMessage(), e);
-        }
-    }
-
-    @SuppressLint("MissingPermission")
-    private void getLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-                android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            locationPermissionGranted = true;
+    private void updateLocation(Location locationCall) {
+        if (hasLocationPermission()) {
+            fusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    updateLocationUI(locationCall);
+                    sentLocationToFirebase(locationCall);
+                }
+            });
         } else {
             ActivityCompat.requestPermissions(this,
                     new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+                    PERMISSION_FINE_LOCATION);
+            if (map != null) {
+                map.setMyLocationEnabled(false);
+                map.getUiSettings().setMyLocationButtonEnabled(false);
+                map.moveCamera(CameraUpdateFactory
+                        .newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
+            }
         }
+    }
+
+    @SuppressLint({"MissingPermission", "ServiceCast"})
+    @Override
+    public void onMapReady(@NonNull GoogleMap map) {
+        this.map = map;
+        setCheckpointsOnMap();
+    }
+
+    private void setCheckpointsOnMap() {
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        Map<GeoPoint, MarkerOptions> markers = new HashMap<>();
+        db.collection("Tasks").document(taskId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            for (GeoPoint point : (List<GeoPoint>) document.get("checkpoints")) {
+                                MarkerOptions marker = new MarkerOptions()
+                                        .position(new LatLng(point.getLatitude(), point.getLongitude()))
+                                        .alpha(0.9F)
+                                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                                markers.put(point, marker);
+                            }
+
+                        } else {
+                            Toast.makeText(this, "Document doesn't exist - Exception: " + task.getException(), Toast.LENGTH_LONG);
+                        }
+                    } else {
+                        Toast.makeText(this, "Cannot fetch the data - Exception: " + task.getException(), Toast.LENGTH_LONG);
+                    }
+                });
+
+        db.collection("CheckpointSubtasks").whereEqualTo("task", taskId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        QuerySnapshot qquery = task.getResult();
+                        if (!qquery.isEmpty()) {
+                            Map<GeoPoint, String> titles = new HashMap<>();
+                            for (DocumentSnapshot doc : qquery.getDocuments()) {
+                                GeoPoint point = (GeoPoint) doc.get("checkpoint");
+                                String title = (String) doc.get("subtaskName");
+                                String participantId = ((String) doc.get("participant")).replaceAll("\\s", "");
+                                if (markers.containsKey(point) && title != null && participantId.equalsIgnoreCase(userId)) {
+                                    if (titles.containsKey(point)) {
+                                        String newTitle = titles.get(point) + "\n" + title;
+                                        titles.replace(point, newTitle);
+                                    } else {
+                                        titles.put(point, title);
+                                    }
+                                }
+                            }
+                            for (MarkerOptions marker : markers.values()) {
+                                LatLng p = marker.getPosition();
+                                GeoPoint pp = new GeoPoint(p.latitude, p.longitude);
+                                map.addMarker(marker.title(titles.get(pp)));
+                            }
+                        } else {
+                            Toast.makeText(this, "Document doesn't exist - Exception: " + task.getException(), Toast.LENGTH_LONG);
+                        }
+                    } else {
+                        Toast.makeText(this, "Cannot fetch the data - Exception: " + task.getException(), Toast.LENGTH_LONG);
+                    }
+                });
     }
 
     @SuppressLint("MissingPermission")
@@ -179,33 +204,52 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        locationPermissionGranted = false;
-        if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                locationPermissionGranted = true;
-            }
-        } else {
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        }
-        updateLocationUI();
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    private void updateLocationUI() {
+    private void updateLocationUI(Location location) {
         if (map == null) {
             return;
         }
         try {
-            if (locationPermissionGranted) {
-                map.setMyLocationEnabled(true);
-                map.getUiSettings().setMyLocationButtonEnabled(true);
-            } else {
-                map.setMyLocationEnabled(false);
-                map.getUiSettings().setMyLocationButtonEnabled(false);
-                lastKnownLocation = null;
-                getLocationPermission();
-            }
-        } catch (SecurityException e)  {
+            map.setMyLocationEnabled(true);
+            map.getUiSettings().setMyLocationButtonEnabled(true);
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                    new LatLng(location.getLatitude(),
+                            location.getLongitude()), DEFAULT_ZOOM));
+        } catch (SecurityException e) {
             Log.e("Exception: %s", e.getMessage());
         }
     }
+
+    private void sentLocationToFirebase(Location location) {
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        GeoPoint currLocation = new GeoPoint(location.getLatitude(), location.getLongitude());
+
+        Map<String, Object> checkpointReport = new HashMap<>();
+        checkpointReport.put("location", currLocation);
+        checkpointReport.put("patrollingMemberId", userId);
+        checkpointReport.put("taskId", taskId);
+        checkpointReport.put("time", Timestamp.now());
+
+        db.collection("Point").add(checkpointReport)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "DocumentSnapshot written");
+                })
+                .addOnFailureListener(e -> Log.w(TAG, "Error adding document", e));
+    }
+
+    protected LocationRequest getLocationRequest() {
+        return new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, MIN_TIME)
+                .setMinUpdateDistanceMeters(MIN_DISTANCE)
+                .setGranularity(Granularity.GRANULARITY_PERMISSION_LEVEL)
+                .setWaitForAccurateLocation(true)
+                .build();
+    }
+
+    private boolean hasLocationPermission() {
+        return ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
+
 }
