@@ -34,7 +34,6 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -43,6 +42,8 @@ import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +68,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
     private static final long MIN_DISTANCE = 5;
     LocationCallback locationCallback;
     private String taskId;
-
+    private static final int COLOR_GREEN_ARGB = 0xffa9ac5d;
 
     @SuppressLint("MissingPermission")
     @Override
@@ -138,6 +139,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
     public void onMapReady(@NonNull GoogleMap map) {
         this.map = map;
         setCheckpointsOnMap();
+        showRoute();
     }
 
     private void setCheckpointsOnMap() {
@@ -158,10 +160,10 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                             }
 
                         } else {
-                            Toast.makeText(this, "Document doesn't exist - Exception: " + task.getException(), Toast.LENGTH_LONG);
+                            Toast.makeText(this, "Document doesn't exist - Exception: " + task.getException(), Toast.LENGTH_LONG).show();
                         }
                     } else {
-                        Toast.makeText(this, "Cannot fetch the data - Exception: " + task.getException(), Toast.LENGTH_LONG);
+                        Toast.makeText(this, "Cannot fetch the data - Exception: " + task.getException(), Toast.LENGTH_LONG).show();
                     }
                 });
 
@@ -191,10 +193,51 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                                 map.addMarker(marker.title(titles.get(pp)));
                             }
                         } else {
-                            Toast.makeText(this, "Document doesn't exist - Exception: " + task.getException(), Toast.LENGTH_LONG);
+                            Toast.makeText(this, "Document doesn't exist - Exception: " + task.getException(), Toast.LENGTH_LONG).show();
                         }
                     } else {
-                        Toast.makeText(this, "Cannot fetch the data - Exception: " + task.getException(), Toast.LENGTH_LONG);
+                        Toast.makeText(this, "Cannot fetch the data - Exception: " + task.getException(), Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
+
+    private void showRoute() {
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        db.collection("Point").whereEqualTo("taskId", taskId)
+                .get()
+                .addOnCompleteListener(task -> {
+                    Map<Timestamp, LatLng> map1 = new HashMap<>();
+                    List<LatLng> points = new ArrayList<>();
+                    if (task.isSuccessful()) {
+                        QuerySnapshot qquery = task.getResult();
+                        if (!qquery.isEmpty()) {
+                            for (DocumentSnapshot doc : qquery.getDocuments()) {
+                                String participantId = (String) doc.get("patrollingMemberId");
+                                assert participantId != null;
+                                if (participantId.equalsIgnoreCase(userId)) {
+                                    GeoPoint geoPoint = (GeoPoint) doc.get("location");
+                                    assert geoPoint != null;
+                                    LatLng latLng = new LatLng(geoPoint.getLatitude(), geoPoint.getLongitude());
+                                    map1.put((Timestamp) doc.get("time"), latLng);
+                                }
+                            }
+                            List<Timestamp> time = new ArrayList<>(map1.keySet());
+                            Collections.sort(time);
+                            for (Timestamp t : time) {
+                                points.add(map1.get(t));
+                            }
+                            LatLng[] list = points.toArray(new LatLng[0]);
+                            System.out.println(Arrays.toString(list));
+                            Polyline polyline = map.addPolyline(new PolylineOptions()
+                                    .clickable(false)
+                                    .add(list));
+                            polyline.setColor(COLOR_GREEN_ARGB);
+                        } else {
+                            Toast.makeText(this, "Document doesn't exist - Exception: " + task.getException(), Toast.LENGTH_LONG).show();
+                        }
+                    } else {
+                        Toast.makeText(this, "Cannot fetch the data - Exception: " + task.getException(), Toast.LENGTH_LONG).show();
                     }
                 });
     }
