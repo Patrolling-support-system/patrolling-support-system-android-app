@@ -2,7 +2,6 @@ package pl.agh.patrollingsupportsystem.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.ViewCompat;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -30,24 +29,22 @@ import pl.agh.patrollingsupportsystem.recyclerViews.checkpoints.CheckpointAdapte
 
 public class TaskDetailsActivity extends AppCompatActivity implements RecyclerViewInterface {
 
-    TextView tvTaskName, tvTaskDescription, tvLocation, tvStartDate, tvEndDate;
-    Button btnCoordinatorChat, btnAddReport, btnMap;
-    String coordinator;
-    FirebaseFirestore fbDb;
-    String taskDocumentIdExtras;
-
+    private TextView tvTaskName, tvTaskDescription, tvLocation, tvStartDate, tvEndDate;
+    private Button btnCoordinatorChat, btnAddReport, btnMap;
+    private String coordinator;
+    private FirebaseFirestore fbDb;
+    private String taskDocumentIdExtras;
     //Used for RecyclerView
-    RecyclerView rvCheckpointList;
-    CheckpointAdapter checkpointAdapter;
-    List<GeoPoint> checkpointList;
-    List<String> checkpointNamesList;
+    private RecyclerView rvCheckpointList;
+    private CheckpointAdapter checkpointAdapter;
+    private List<GeoPoint> checkpointList;
+    private List<String> checkpointNamesList;
 
     @SuppressLint({"MissingInflatedId", "SimpleDateFormat"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task_details);
-
 
         //Catch and set extras
         Bundle documentExtras = getIntent().getExtras();
@@ -71,16 +68,16 @@ public class TaskDetailsActivity extends AppCompatActivity implements RecyclerVi
         fbDb = FirebaseFirestore.getInstance();
 
         btnCoordinatorChat.setOnClickListener(v ->
-            startActivity(new Intent(TaskDetailsActivity.this, ChatActivity.class)
-                    .putExtra("coordinator", coordinator)
-                    .putExtra("task_document", finalTaskDocumentId))
+                startActivity(new Intent(TaskDetailsActivity.this, ChatActivity.class)
+                        .putExtra("coordinator", coordinator)
+                        .putExtra("task_document", finalTaskDocumentId))
         );
         btnAddReport.setOnClickListener(v ->
-            startActivity(new Intent(TaskDetailsActivity.this, ReportForLocationActivity.class)
-                    .putExtra("task_document", finalTaskDocumentId))
+                startActivity(new Intent(TaskDetailsActivity.this, ReportForLocationActivity.class)
+                        .putExtra("task_document", finalTaskDocumentId))
         );
-        btnMap.setOnClickListener(v -> startActivity(new Intent(TaskDetailsActivity.this, MapsActivityCurrentPlace.class)));
 
+        btnMap.setOnClickListener(v -> startActivity(new Intent(TaskDetailsActivity.this, MapsActivityCurrentPlace.class).putExtra("taskId", finalTaskDocumentId)));
 
         fbDb.collection("Tasks").document(taskDocumentId)
                 .get()
@@ -101,7 +98,6 @@ public class TaskDetailsActivity extends AppCompatActivity implements RecyclerVi
                         Toast.makeText(this, "Cannot fetch the data - Exception: " + task.getException(), Toast.LENGTH_LONG);
                     }
                 });
-
 
         //RecyclerCheckpointView
         rvCheckpointList = findViewById(R.id.recyclerViewCheckpointList);
@@ -129,8 +125,6 @@ public class TaskDetailsActivity extends AppCompatActivity implements RecyclerVi
                 }
             }
         }).addOnFailureListener(e -> Toast.makeText(this, "Database issue: " + e.getMessage(), Toast.LENGTH_LONG).show());
-
-
     }
 
     @Override

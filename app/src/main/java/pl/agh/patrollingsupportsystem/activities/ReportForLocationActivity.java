@@ -4,13 +4,18 @@ import static android.content.ContentValues.TAG;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
@@ -26,8 +31,12 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.android.datatransport.BuildConfig;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -43,7 +52,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-//import pl.agh.patrollingsupportsystem.BuildConfig;
 import pl.agh.patrollingsupportsystem.R;
 import pl.agh.patrollingsupportsystem.recyclerViews.models.AudioRecording;
 import pl.agh.patrollingsupportsystem.recyclerViews.audioRecordings.AudioRecordingListAdapter;
@@ -69,16 +77,18 @@ public class ReportForLocationActivity extends AppCompatActivity {
     FirebaseFirestore fbDb;
     String fbAuthUser;
     StorageReference fbStorageReference;
+    private FusedLocationProviderClient fusedLocationProviderClient;
+    private static final int PERMISSION_FINE_LOCATION = 1;
 
-
-
-    @SuppressLint("MissingInflatedId")
+    @SuppressLint({"MissingInflatedId", "MissingPermission"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report_for_location);
-
         reportDocumentId = generateDocumentId();
+
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        getLocationPermission();
 
         //References
         imageReferenceList = new ArrayList<>();
@@ -131,7 +141,7 @@ public class ReportForLocationActivity extends AppCompatActivity {
                     imagesList.addAll(result);
                     for (int i = 0; i < result.size(); i++) {
                         ImageView imageView = new ImageView(ReportForLocationActivity.this);
-                        imageView.setPadding(0,0,0,0);
+                        imageView.setPadding(0, 0, 0, 0);
                         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                                 ViewGroup.LayoutParams.WRAP_CONTENT,
                                 ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -149,13 +159,12 @@ public class ReportForLocationActivity extends AppCompatActivity {
         btnAddImage.setOnClickListener(v -> choosePhoto.launch("image/*"));
 
         //Take picture
-
         takePictureLauncher = registerForActivityResult(
                 new ActivityResultContracts.TakePicture(), result -> {
                     if (result) {
                         imagesList.add(imageUri);
                         ImageView imageView = new ImageView(ReportForLocationActivity.this);
-                        imageView.setPadding(0,0,0,0);
+                        imageView.setPadding(0, 0, 0, 0);
                         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                                 ViewGroup.LayoutParams.WRAP_CONTENT,
                                 ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -174,7 +183,6 @@ public class ReportForLocationActivity extends AppCompatActivity {
         btnTakePicture.setOnClickListener(v -> dispatchTakePictureIntent());
 
         //Audio recording
-
         recordButton.setOnClickListener(v -> {
             if (!isRecording) {
                 // Start recording
@@ -182,7 +190,7 @@ public class ReportForLocationActivity extends AppCompatActivity {
                 recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
                 recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
                 recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-                String fileNameStr = (new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) +  ".mpeg4");
+                String fileNameStr = (new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".mpeg4");
                 AudioRecording fileName = new AudioRecording();
                 fileName.setFileName(fileNameStr);
                 audioRecordingList.add(fileName);
@@ -210,7 +218,6 @@ public class ReportForLocationActivity extends AppCompatActivity {
             }
         });
 
-
         stopButton.setOnClickListener(v -> {
             if (isRecording) {
                 // Stop recording
@@ -225,19 +232,19 @@ public class ReportForLocationActivity extends AppCompatActivity {
             }
         });
 
-        btnSendReport.setOnClickListener( v -> {
+        // Report sending
+        btnSendReport.setOnClickListener(v -> {
             SendImages(finalTaskDocumentId);
             SendAudioRecordings(finalTaskDocumentId);
-            SendNote(finalTaskDocumentId, finalSubtaskDocumentId);
+            sentReport(finalTaskDocumentId, finalSubtaskDocumentId);
         });
-
     }
 
     private void EventChangeListener() {
         audioRecordingListAdapter.notifyDataSetChanged();
     }
 
-    private void SendImages(String finalTaskDocumentId){
+    private void SendImages(String finalTaskDocumentId) {
         for (int i = 0; i < imagesList.size(); i++) {
             StorageReference imageRef = fbStorageReference.child(finalTaskDocumentId + '/' + reportDocumentId + '/' + "images/" + UUID.randomUUID().toString());
             imageReferenceList.add(imageRef.getPath());
@@ -251,12 +258,12 @@ public class ReportForLocationActivity extends AppCompatActivity {
         finish();
     }
 
-    private void SendAudioRecordings(String finalTaskDocumentId){
+    private void SendAudioRecordings(String finalTaskDocumentId) {
         for (int i = 0; i < audioRecordingList.size(); i++) {
             File f = new File(getExternalCacheDir().getAbsolutePath() + audioRecordingList.get(i).getFileName());
             System.out.println(getExternalCacheDir().getAbsolutePath() + audioRecordingList.get(i).getFileName());
             Uri mAudioUri = FileProvider.getUriForFile(Objects.requireNonNull(getApplicationContext()),
-                    BuildConfig.APPLICATION_ID+ ".provider", f
+                    BuildConfig.APPLICATION_ID + ".provider", f
             );
             StorageReference audioRef = fbStorageReference.child(finalTaskDocumentId + '/' + reportDocumentId + '/' + "audio/" + audioRecordingList.get(i).getFileName());
             audioRecordingReferenceList.add(audioRef.getPath());
@@ -267,34 +274,11 @@ public class ReportForLocationActivity extends AppCompatActivity {
                     .addOnFailureListener(e -> Log.w(TAG, "Error audio recording upload: ", e));
         }
     }
+
     public static String generateDocumentId() {
-        String uuid = UUID.randomUUID().toString().substring(0,20);
+        String uuid = UUID.randomUUID().toString().substring(0, 20);
         return uuid.replaceAll("-", "");
     }
-
-    private void SendNote(String finalTaskDocumentId, String finalSubtaskDocumentId){
-        String note = etNote.getText().toString();
-
-        // creating report with text note
-        // after changing actionList to Tasks change to current checkpoint from db
-
-        Map<String, Object> checkpointReport = new HashMap<>();
-        checkpointReport.put("checkpointNumber", 1);
-        checkpointReport.put("note", note);
-        checkpointReport.put("images", imageReferenceList);
-        checkpointReport.put("recordings", audioRecordingReferenceList);
-        checkpointReport.put("patrolParticipant", fbAuthUser);
-        checkpointReport.put("task", finalTaskDocumentId);
-        checkpointReport.put("subtaskId", finalSubtaskDocumentId);
-
-        fbDb.collection("CheckpointReport").document(reportDocumentId)
-                .set(checkpointReport)
-                .addOnSuccessListener(aVoid -> {
-                    Log.d(TAG, "DocumentSnapshot written");
-                })
-                .addOnFailureListener(e -> Log.w(TAG, "Error adding document", e));
-    }
-
 
     //Take picture
     public void dispatchTakePictureIntent() {
@@ -308,7 +292,7 @@ public class ReportForLocationActivity extends AppCompatActivity {
             }
             if (photoFile != null) {
                 imageUri = FileProvider.getUriForFile(Objects.requireNonNull(getApplicationContext()),
-                        BuildConfig.APPLICATION_ID+ ".provider",
+                        BuildConfig.APPLICATION_ID + ".provider",
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
                 takePictureLauncher.launch(imageUri);
@@ -328,4 +312,55 @@ public class ReportForLocationActivity extends AppCompatActivity {
 
         return image;
     }
+
+    @SuppressLint("MissingPermission")
+    private void sentReport(String finalTaskDocumentId, String finalSubtaskDocumentId) {
+        if (hasLocationPermission()) {
+            fusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    String note = etNote.getText().toString();
+                    GeoPoint currLocation = new GeoPoint(location.getLatitude(), location.getLongitude());
+
+                    Map<String, Object> checkpointReport = new HashMap<>();
+                    checkpointReport.put("location", currLocation);
+                    checkpointReport.put("note", note);
+                    checkpointReport.put("images", imageReferenceList);
+                    checkpointReport.put("recordings", audioRecordingReferenceList);
+                    checkpointReport.put("patrolParticipant", fbAuthUser);
+                    checkpointReport.put("task", finalTaskDocumentId);
+                    checkpointReport.put("subtaskId", finalSubtaskDocumentId);
+
+                    fbDb.collection("CheckpointReport").document(reportDocumentId)
+                            .set(checkpointReport)
+                            .addOnSuccessListener(aVoid -> {Log.d(TAG, "DocumentSnapshot written");})
+                            .addOnFailureListener(e -> Log.w(TAG, "Error adding document", e));
+                }
+            });
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private void getLocationPermission() {
+        if (!hasLocationPermission()) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSION_FINE_LOCATION);
+        }
+    }
+
+    private boolean hasLocationPermission() {
+        return ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    @SuppressLint("MissingPermission")
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+    }
+
 }
