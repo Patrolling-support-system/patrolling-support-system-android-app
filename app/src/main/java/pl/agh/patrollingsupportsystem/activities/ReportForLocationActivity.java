@@ -127,12 +127,15 @@ public class ReportForLocationActivity extends AppCompatActivity {
         Bundle documentExtras = getIntent().getExtras();
         String taskDocumentId = null;
         String subtaskDocumentId = null;
+        GeoPoint checkpoint = null;
         if (documentExtras != null) {
             taskDocumentId = documentExtras.getString("task_document");
             subtaskDocumentId = documentExtras.getString("subtask_document");
+            checkpoint = new GeoPoint(documentExtras.getDouble("checkpoint_latitude"),documentExtras.getDouble("checkpoint_longitude"));
         }
         String finalTaskDocumentId = taskDocumentId; //To use as parameter
         String finalSubtaskDocumentId = subtaskDocumentId;
+        GeoPoint finalCheckpoint = checkpoint;
 
         //Photo from device
         choosePhoto = registerForActivityResult(
@@ -236,7 +239,7 @@ public class ReportForLocationActivity extends AppCompatActivity {
         btnSendReport.setOnClickListener(v -> {
             SendImages(finalTaskDocumentId);
             SendAudioRecordings(finalTaskDocumentId);
-            sentReport(finalTaskDocumentId, finalSubtaskDocumentId);
+            sentReport(finalTaskDocumentId, finalSubtaskDocumentId, finalCheckpoint);
         });
     }
 
@@ -314,13 +317,17 @@ public class ReportForLocationActivity extends AppCompatActivity {
     }
 
     @SuppressLint("MissingPermission")
-    private void sentReport(String finalTaskDocumentId, String finalSubtaskDocumentId) {
+    private void sentReport(String finalTaskDocumentId, String finalSubtaskDocumentId, GeoPoint finalCheckpoint) {
         if (hasLocationPermission()) {
             fusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
                 @Override
                 public void onSuccess(Location location) {
                     String note = etNote.getText().toString();
-                    GeoPoint currLocation = new GeoPoint(location.getLatitude(), location.getLongitude());
+                    GeoPoint currLocation;
+                    if(finalCheckpoint == null)
+                        currLocation = new GeoPoint(location.getLatitude(), location.getLongitude());
+                    else
+                        currLocation = finalCheckpoint;
 
                     Map<String, Object> checkpointReport = new HashMap<>();
                     checkpointReport.put("location", currLocation);

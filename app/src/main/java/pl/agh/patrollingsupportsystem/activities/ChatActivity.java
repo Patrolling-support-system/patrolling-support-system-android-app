@@ -114,6 +114,7 @@ public class ChatActivity extends AppCompatActivity {
                 .addSnapshotListener(ev);
     }
 
+    //TODO Change with coordinator collection
     private void coordinatorHeaderSet() {
         fbDb.collection("User").whereEqualTo("userId", coordinatorId).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {

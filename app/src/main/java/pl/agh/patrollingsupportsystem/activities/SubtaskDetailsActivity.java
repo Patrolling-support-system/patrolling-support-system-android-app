@@ -87,7 +87,9 @@ public class SubtaskDetailsActivity extends AppCompatActivity {
                                             btnAddReport.setOnClickListener(v ->
                                                     startActivity(new Intent(SubtaskDetailsActivity.this, ReportForLocationActivity.class)
                                                             .putExtra("task_document", taskDocumentId)
-                                                            .putExtra("subtask_document", subtaskDocumentId)));
+                                                            .putExtra("subtask_document", subtaskDocumentId)
+                                                            .putExtra("checkpoint_latitude", checkpoint.getLatitude())
+                                                            .putExtra("checkpoint_longitude", checkpoint.getLongitude())));
                                         }
                                     }
                                 });

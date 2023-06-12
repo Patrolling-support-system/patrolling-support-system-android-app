@@ -30,6 +30,7 @@ public class SubtaskListActivity extends AppCompatActivity implements RecyclerVi
     List<SubtaskExtended> subtaskList;
     List<String> subtaskDocumentList;
     String taskDocumentId;
+    String checkpointName;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -46,10 +47,12 @@ public class SubtaskListActivity extends AppCompatActivity implements RecyclerVi
         Double latitude = null;
         Double longitude = null;
         taskDocumentId = null;
+        checkpointName = null;
         if (documentExtras != null) {
             latitude = documentExtras.getDouble("checkpoint_latitude");
             longitude = documentExtras.getDouble("checkpoint_longitude");
             taskDocumentId = documentExtras.getString("task_document");
+            checkpointName = documentExtras.getString("checkpoint_name");
         }
         System.out.println(latitude + " " + longitude);
 
@@ -58,7 +61,7 @@ public class SubtaskListActivity extends AppCompatActivity implements RecyclerVi
         SubtaskListAdapter subtaskListAdapter = new SubtaskListAdapter( this, subtaskList, this);
 
         tvCheckpointCoordinates = findViewById(R.id.textViewCheckpointCoordinates);
-        tvCheckpointCoordinates.setText(latitude + " | " + longitude);
+        tvCheckpointCoordinates.setText(checkpointName);
         GeoPoint checkpoint = new GeoPoint(latitude, longitude);
 
 

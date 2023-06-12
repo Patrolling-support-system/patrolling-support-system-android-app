@@ -132,6 +132,7 @@ public class TaskDetailsActivity extends AppCompatActivity implements RecyclerVi
         startActivity(new Intent(TaskDetailsActivity.this, SubtaskListActivity.class)
                 .putExtra("checkpoint_latitude", checkpointList.get(position).getLatitude())
                 .putExtra("checkpoint_longitude", checkpointList.get(position).getLongitude())
-                .putExtra("task_document", taskDocumentIdExtras));
+                .putExtra("task_document", taskDocumentIdExtras)
+                .putExtra("checkpoint_name", checkpointNamesList.get(position)));
     }
 }
