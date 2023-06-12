@@ -225,7 +225,7 @@ public class ReportForLocationActivity extends AppCompatActivity {
         btnSendReport.setOnClickListener( v -> {
             SendImages(finalTaskDocumentId);
             SendAudioRecordings(finalTaskDocumentId);
-            SendNote();
+            SendNote(finalTaskDocumentId);
         });
 
     }
@@ -269,7 +269,7 @@ public class ReportForLocationActivity extends AppCompatActivity {
         return uuid.replaceAll("-", "");
     }
 
-    private void SendNote(){
+    private void SendNote(String finalTaskDocumentId){
         String note = etNote.getText().toString();
 
         // creating report with text note
@@ -281,6 +281,7 @@ public class ReportForLocationActivity extends AppCompatActivity {
         checkpointReport.put("images", imageReferenceList);
         checkpointReport.put("recordings", audioRecordingReferenceList);
         checkpointReport.put("patrolParticipant", fbAuthUser);
+        checkpointReport.put("task", finalTaskDocumentId);
 
         fbDb.collection("CheckpointReport").document(reportDocumentId)
                 .set(checkpointReport)
