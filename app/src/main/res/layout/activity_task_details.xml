@@ -262,18 +262,18 @@
 
     <Button
         android:id="@+id/mapButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="65dp"
+        android:layout_height="53dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
         android:backgroundTint="@color/green_200"
-        android:fontFamily="@font/signika_negative"
         android:src="@android:drawable/ic_menu_mylocation"
-        android:textColor="@color/green_800"
         app:icon="@android:drawable/ic_menu_mylocation"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.9"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.9" />
+        app:layout_constraintVertical_bias="0.965" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
