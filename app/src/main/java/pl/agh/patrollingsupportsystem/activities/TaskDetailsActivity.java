@@ -40,6 +40,7 @@ public class TaskDetailsActivity extends AppCompatActivity implements RecyclerVi
     RecyclerView rvCheckpointList;
     CheckpointAdapter checkpointAdapter;
     List<GeoPoint> checkpointList;
+    List<String> checkpointNamesList;
 
     @SuppressLint({"MissingInflatedId", "SimpleDateFormat"})
     @Override
@@ -106,7 +107,8 @@ public class TaskDetailsActivity extends AppCompatActivity implements RecyclerVi
         rvCheckpointList = findViewById(R.id.recyclerViewCheckpointList);
         ViewCompat.setNestedScrollingEnabled(rvCheckpointList, false);
         checkpointList = new ArrayList<>();
-        checkpointAdapter = new CheckpointAdapter(this, checkpointList, this);
+        checkpointNamesList = new ArrayList<>();
+        checkpointAdapter = new CheckpointAdapter(this, checkpointList, checkpointNamesList, this);
         rvCheckpointList.setAdapter(checkpointAdapter);
         rvCheckpointList.setLayoutManager(new LinearLayoutManager(this));
         rvCheckpointList.setHasFixedSize(true);
@@ -117,9 +119,12 @@ public class TaskDetailsActivity extends AppCompatActivity implements RecyclerVi
         taskDocumentReference.get().addOnSuccessListener(documentSnapshot -> {
             if (documentSnapshot.exists()) {
                 List<GeoPoint> tempCheckpointList = (List<GeoPoint>) documentSnapshot.get("checkpoints");
+                List<String> tempCheckpointNamesList = (List<String>) documentSnapshot.get("checkpointNames");
                 if (tempCheckpointList != null) {
                     checkpointList.clear();
                     checkpointList.addAll(tempCheckpointList);
+                    checkpointNamesList.clear();
+                    checkpointNamesList.addAll(tempCheckpointNamesList);
                     checkpointAdapter.notifyDataSetChanged();
                 }
             }

@@ -31,11 +31,13 @@ public class CheckpointAdapter extends RecyclerView.Adapter<CheckpointAdapter.Vi
     Context context;
     RecyclerViewInterface recyclerViewInterface;
     private List<GeoPoint> checkpoints;
+    private List<String> checkpointNames;
 
 
-    public CheckpointAdapter(Context context, List<GeoPoint> checkpoints, RecyclerViewInterface recyclerViewInterface) {
+    public CheckpointAdapter(Context context, List<GeoPoint> checkpoints, List<String> checkpointNames, RecyclerViewInterface recyclerViewInterface) {
         this.context = context;
         this.checkpoints = checkpoints;
+        this.checkpointNames = checkpointNames;
         this.recyclerViewInterface = recyclerViewInterface;
     }
 
@@ -54,7 +56,7 @@ public class CheckpointAdapter extends RecyclerView.Adapter<CheckpointAdapter.Vi
         holder.rvSubtasks.setHasFixedSize(true);
 
 
-        holder.textViewCheckpointName.setText(checkpoint.getLatitude() + " | " + checkpoint.getLongitude());
+        holder.textViewCheckpointName.setText(checkpointNames.get(position));
         List<SubtaskExtended> subtasks = new ArrayList<>();
         SubtaskAdapter subtaskAdapter = new SubtaskAdapter(subtasks, holder.rvSubtasks.getContext());
         fbDb.collection("CheckpointSubtasks").whereEqualTo("checkpoint", checkpoint)
