@@ -1,5 +1,6 @@
 package pl.agh.patrollingsupportsystem.recyclerViews.tasks;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import pl.agh.patrollingsupportsystem.R;
@@ -34,12 +36,13 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.Action
         return new ActionViewHolder(v, recyclerViewInterface);
     }
 
+    @SuppressLint("SimpleDateFormat")
     @Override
     public void onBindViewHolder(@NonNull ActionViewHolder holder, int position) {
         Task taskModel = taskList.get(position);
         holder.tvTaskName.setText(taskModel.getName());
         holder.tvTaskLocation.setText(taskModel.getLocation());
-        holder.tvTaskStartDate.setText(taskModel.getStartDate().toDate().toString());
+        holder.tvTaskStartDate.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm").format(taskModel.getStartDate().toDate()));
 
     }
 

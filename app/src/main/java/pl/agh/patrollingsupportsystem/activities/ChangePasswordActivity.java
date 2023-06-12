@@ -63,8 +63,8 @@ public class ChangePasswordActivity extends AppCompatActivity {
         fbUser.reauthenticate(credential)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        fbUser.updatePassword(newPassword).addOnCompleteListener(task1 -> {
-                            if (task1.isSuccessful()) {
+                        fbUser.updatePassword(newPassword).addOnCompleteListener(taskUpdate -> {
+                            if (taskUpdate.isSuccessful()) {
                                 Toast.makeText(ChangePasswordActivity.this, "Password updated successfully", Toast.LENGTH_SHORT);
                                 finish();
                                 startActivity(new Intent(ChangePasswordActivity.this, LoginActivity.class));

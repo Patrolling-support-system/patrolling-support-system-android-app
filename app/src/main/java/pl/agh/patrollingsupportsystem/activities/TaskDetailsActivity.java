@@ -19,8 +19,10 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import pl.agh.patrollingsupportsystem.R;
 import pl.agh.patrollingsupportsystem.recyclerViews.RecyclerViewInterface;
@@ -39,7 +41,7 @@ public class TaskDetailsActivity extends AppCompatActivity implements RecyclerVi
     CheckpointAdapter checkpointAdapter;
     List<GeoPoint> checkpointList;
 
-    @SuppressLint("MissingInflatedId")
+    @SuppressLint({"MissingInflatedId", "SimpleDateFormat"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,8 +91,8 @@ public class TaskDetailsActivity extends AppCompatActivity implements RecyclerVi
                             coordinator = document.getString("coordinator");
                             tvTaskName.setText(document.getString("name"));
                             tvTaskDescription.setText(document.getString("taskDescription"));
-                            tvStartDate.setText(document.getDate("startDate").toString());
-                            tvEndDate.setText(document.getDate("endDate").toString());
+                            tvStartDate.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm").format(Objects.requireNonNull(document.getDate("startDate"))));
+                            tvEndDate.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm").format(Objects.requireNonNull(document.getDate("endDate"))));
                         } else {
                             Toast.makeText(this, "Document doesn't exist - Exception: " + task.getException(), Toast.LENGTH_LONG);
                         }
