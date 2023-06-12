@@ -82,12 +82,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="horizontal"
+            android:orientation="vertical"
             tools:ignore="NestedWeights">
 
             <TextView
                 android:id="@+id/labelSubtaskDescription"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:fontFamily="@font/signika_negative"
@@ -99,11 +99,12 @@
 
             <TextView
                 android:id="@+id/textViewSubtaskDescription"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:fontFamily="@font/signika_negative"
                 android:maxWidth="80dp"
+                android:layout_marginBottom="10dp"
                 android:textColor="@color/green_800"
                 android:textSize="20sp" />
         </LinearLayout>
