@@ -86,7 +86,8 @@ public class SubtaskDetailsActivity extends AppCompatActivity {
                                             // trzeba przebudować report, żeby przyjmował koordynaty checkpointa, jeśli przekazano null to wtedy z obecną lokalizacją
                                             btnAddReport.setOnClickListener(v ->
                                                     startActivity(new Intent(SubtaskDetailsActivity.this, ReportForLocationActivity.class)
-                                                            .putExtra("task_document", taskDocumentId)));
+                                                            .putExtra("task_document", taskDocumentId)
+                                                            .putExtra("subtask_document", subtaskDocumentId)));
                                         }
                                     }
                                 });

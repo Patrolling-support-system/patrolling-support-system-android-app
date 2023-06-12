@@ -34,6 +34,7 @@ import com.google.android.datatransport.BuildConfig;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.storage.FirebaseStorage;
@@ -74,6 +75,7 @@ public class ReportForLocationActivity extends AppCompatActivity {
     MediaRecorder recorder;
     AudioRecordingListAdapter audioRecordingListAdapter;
     FirebaseFirestore fbDb;
+    String fbAuthUser;
     StorageReference fbStorageReference;
     private FusedLocationProviderClient fusedLocationProviderClient;
     private static final int PERMISSION_FINE_LOCATION = 1;
@@ -94,6 +96,7 @@ public class ReportForLocationActivity extends AppCompatActivity {
 
         //Firebase
         fbDb = FirebaseFirestore.getInstance();
+        fbAuthUser = FirebaseAuth.getInstance().getCurrentUser().getUid();
         fbStorageReference = FirebaseStorage.getInstance().getReference();
 
         //Layout elements
@@ -123,10 +126,13 @@ public class ReportForLocationActivity extends AppCompatActivity {
         //Fetching extras
         Bundle documentExtras = getIntent().getExtras();
         String taskDocumentId = null;
+        String subtaskDocumentId = null;
         if (documentExtras != null) {
             taskDocumentId = documentExtras.getString("task_document");
+            subtaskDocumentId = documentExtras.getString("subtask_document");
         }
         String finalTaskDocumentId = taskDocumentId; //To use as parameter
+        String finalSubtaskDocumentId = subtaskDocumentId;
 
         //Photo from device
         choosePhoto = registerForActivityResult(
@@ -230,7 +236,7 @@ public class ReportForLocationActivity extends AppCompatActivity {
         btnSendReport.setOnClickListener(v -> {
             SendImages(finalTaskDocumentId);
             SendAudioRecordings(finalTaskDocumentId);
-            sentReport();
+            sentReport(finalTaskDocumentId, finalSubtaskDocumentId);
         });
     }
 
@@ -308,7 +314,7 @@ public class ReportForLocationActivity extends AppCompatActivity {
     }
 
     @SuppressLint("MissingPermission")
-    private void sentReport() {
+    private void sentReport(String finalTaskDocumentId, String finalSubtaskDocumentId) {
         if (hasLocationPermission()) {
             fusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
                 @Override
@@ -321,6 +327,9 @@ public class ReportForLocationActivity extends AppCompatActivity {
                     checkpointReport.put("note", note);
                     checkpointReport.put("images", imageReferenceList);
                     checkpointReport.put("recordings", audioRecordingReferenceList);
+                    checkpointReport.put("patrolParticipant", fbAuthUser);
+                    checkpointReport.put("task", finalTaskDocumentId);
+                    checkpointReport.put("subtaskId", finalSubtaskDocumentId);
 
                     fbDb.collection("CheckpointReport").document(reportDocumentId)
                             .set(checkpointReport)

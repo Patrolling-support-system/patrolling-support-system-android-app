@@ -18,8 +18,10 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import pl.agh.patrollingsupportsystem.R;
 import pl.agh.patrollingsupportsystem.recyclerViews.RecyclerViewInterface;
@@ -36,8 +38,9 @@ public class TaskDetailsActivity extends AppCompatActivity implements RecyclerVi
     private RecyclerView rvCheckpointList;
     private CheckpointAdapter checkpointAdapter;
     private List<GeoPoint> checkpointList;
+    private List<String> checkpointNamesList;
 
-    @SuppressLint("MissingInflatedId")
+    @SuppressLint({"MissingInflatedId", "SimpleDateFormat"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,8 +89,8 @@ public class TaskDetailsActivity extends AppCompatActivity implements RecyclerVi
                             coordinator = document.getString("coordinator");
                             tvTaskName.setText(document.getString("name"));
                             tvTaskDescription.setText(document.getString("taskDescription"));
-                            tvStartDate.setText(document.getDate("startDate").toString());
-                            tvEndDate.setText(document.getDate("endDate").toString());
+                            tvStartDate.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm").format(Objects.requireNonNull(document.getDate("startDate"))));
+                            tvEndDate.setText(new SimpleDateFormat("dd/MM/yyyy HH:mm").format(Objects.requireNonNull(document.getDate("endDate"))));
                         } else {
                             Toast.makeText(this, "Document doesn't exist - Exception: " + task.getException(), Toast.LENGTH_LONG);
                         }
@@ -100,7 +103,8 @@ public class TaskDetailsActivity extends AppCompatActivity implements RecyclerVi
         rvCheckpointList = findViewById(R.id.recyclerViewCheckpointList);
         ViewCompat.setNestedScrollingEnabled(rvCheckpointList, false);
         checkpointList = new ArrayList<>();
-        checkpointAdapter = new CheckpointAdapter(this, checkpointList, this);
+        checkpointNamesList = new ArrayList<>();
+        checkpointAdapter = new CheckpointAdapter(this, checkpointList, checkpointNamesList, this);
         rvCheckpointList.setAdapter(checkpointAdapter);
         rvCheckpointList.setLayoutManager(new LinearLayoutManager(this));
         rvCheckpointList.setHasFixedSize(true);
@@ -111,9 +115,12 @@ public class TaskDetailsActivity extends AppCompatActivity implements RecyclerVi
         taskDocumentReference.get().addOnSuccessListener(documentSnapshot -> {
             if (documentSnapshot.exists()) {
                 List<GeoPoint> tempCheckpointList = (List<GeoPoint>) documentSnapshot.get("checkpoints");
+                List<String> tempCheckpointNamesList = (List<String>) documentSnapshot.get("checkpointNames");
                 if (tempCheckpointList != null) {
                     checkpointList.clear();
                     checkpointList.addAll(tempCheckpointList);
+                    checkpointNamesList.clear();
+                    checkpointNamesList.addAll(tempCheckpointNamesList);
                     checkpointAdapter.notifyDataSetChanged();
                 }
             }

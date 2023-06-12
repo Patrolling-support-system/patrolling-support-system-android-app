@@ -13,6 +13,7 @@ import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import pl.agh.patrollingsupportsystem.R;
 import pl.agh.patrollingsupportsystem.recyclerViews.models.Task;
@@ -52,7 +53,9 @@ public class TaskListActivity extends AppCompatActivity implements RecyclerViewI
     }
 
     private void EventChangeListener() {
-        fbDb.collection("Tasks").whereArrayContains("patrolParticipants", fbAuth.getCurrentUser().getUid())
+        fbDb.collection("Tasks")
+                .whereArrayContains("patrolParticipants", fbAuth.getCurrentUser().getUid())
+                .whereGreaterThanOrEqualTo("endDate", new Date(System.currentTimeMillis()))
                 .addSnapshotListener((value, error) -> {
                     if (error != null){
                         Log.e("Firestore error ", error.getMessage());
