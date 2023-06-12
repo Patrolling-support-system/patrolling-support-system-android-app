@@ -116,10 +116,13 @@ public class ReportForLocationActivity extends AppCompatActivity {
         //Fetching extras
         Bundle documentExtras = getIntent().getExtras();
         String taskDocumentId = null;
+        String subtaskDocumentId = null;
         if (documentExtras != null) {
             taskDocumentId = documentExtras.getString("task_document");
+            subtaskDocumentId = documentExtras.getString("subtask_document");
         }
         String finalTaskDocumentId = taskDocumentId; //To use as parameter
+        String finalSubtaskDocumentId = subtaskDocumentId;
 
         //Photo from device
         choosePhoto = registerForActivityResult(
@@ -225,7 +228,7 @@ public class ReportForLocationActivity extends AppCompatActivity {
         btnSendReport.setOnClickListener( v -> {
             SendImages(finalTaskDocumentId);
             SendAudioRecordings(finalTaskDocumentId);
-            SendNote(finalTaskDocumentId);
+            SendNote(finalTaskDocumentId, finalSubtaskDocumentId);
         });
 
     }
@@ -269,7 +272,7 @@ public class ReportForLocationActivity extends AppCompatActivity {
         return uuid.replaceAll("-", "");
     }
 
-    private void SendNote(String finalTaskDocumentId){
+    private void SendNote(String finalTaskDocumentId, String finalSubtaskDocumentId){
         String note = etNote.getText().toString();
 
         // creating report with text note
@@ -282,6 +285,7 @@ public class ReportForLocationActivity extends AppCompatActivity {
         checkpointReport.put("recordings", audioRecordingReferenceList);
         checkpointReport.put("patrolParticipant", fbAuthUser);
         checkpointReport.put("task", finalTaskDocumentId);
+        checkpointReport.put("subtaskId", finalSubtaskDocumentId);
 
         fbDb.collection("CheckpointReport").document(reportDocumentId)
                 .set(checkpointReport)

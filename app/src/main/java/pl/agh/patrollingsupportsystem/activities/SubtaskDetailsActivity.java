@@ -46,7 +46,9 @@ public class SubtaskDetailsActivity extends AppCompatActivity {
 
         btnAddReport.setOnClickListener(v ->
                 startActivity(new Intent(SubtaskDetailsActivity.this, ReportForLocationActivity.class)
-                        .putExtra("task_document", taskDocumentId)));
+                        .putExtra("task_document", taskDocumentId)
+                        .putExtra("subtask_document", subtaskDocumentId)));
+
 
         FirebaseData();
     }
