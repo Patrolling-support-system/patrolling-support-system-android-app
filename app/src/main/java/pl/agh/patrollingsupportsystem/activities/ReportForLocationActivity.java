@@ -26,6 +26,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.android.datatransport.BuildConfig;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -66,6 +67,7 @@ public class ReportForLocationActivity extends AppCompatActivity {
     MediaRecorder recorder;
     AudioRecordingListAdapter audioRecordingListAdapter;
     FirebaseFirestore fbDb;
+    String fbAuthUser;
     StorageReference fbStorageReference;
 
 
@@ -84,6 +86,7 @@ public class ReportForLocationActivity extends AppCompatActivity {
 
         //Firebase
         fbDb = FirebaseFirestore.getInstance();
+        fbAuthUser = FirebaseAuth.getInstance().getCurrentUser().getUid();
         fbStorageReference = FirebaseStorage.getInstance().getReference();
 
         //Layout elements
@@ -277,6 +280,7 @@ public class ReportForLocationActivity extends AppCompatActivity {
         checkpointReport.put("note", note);
         checkpointReport.put("images", imageReferenceList);
         checkpointReport.put("recordings", audioRecordingReferenceList);
+        checkpointReport.put("patrolParticipant", fbAuthUser);
 
         fbDb.collection("CheckpointReport").document(reportDocumentId)
                 .set(checkpointReport)
