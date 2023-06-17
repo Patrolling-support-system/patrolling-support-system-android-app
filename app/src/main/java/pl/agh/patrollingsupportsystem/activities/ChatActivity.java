@@ -114,14 +114,16 @@ public class ChatActivity extends AppCompatActivity {
                 .addSnapshotListener(ev);
     }
 
+    //TODO Change with coordinator collection
     private void coordinatorHeaderSet() {
-        fbDb.collection("User").whereEqualTo("userId", coordinatorId).get().addOnCompleteListener(task -> {
+        fbDb.collection("Coordinator").whereEqualTo("userId", coordinatorId).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 QuerySnapshot querySnapshot = task.getResult();
                 for (QueryDocumentSnapshot document : querySnapshot) {
                     String name = document.getString("name");
                     String surname = document.getString("surname");
                     tvCoordinatorName.setText(name + " " + surname);
+                    System.out.println(name + surname);
                 }
             } else {
                 Log.d(TAG, "Error getting documents: ", task.getException());
