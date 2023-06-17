@@ -18,16 +18,18 @@
         app:layout_constraintTop_toTopOf="parent"/>
 
     <TextView
-        android:layout_marginTop="15dp"
+        android:paddingVertical="15dp"
         android:id="@+id/coordinatorName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:ellipsize="end"
         android:gravity="center"
         android:maxLines="1"
-        android:textColor="@color/beige"
+        android:textColor="@color/black"
         android:textSize="14sp"
         android:textStyle="bold"
+        android:translationZ="100dp"
+        android:background="@color/beige"
         app:layout_constraintEnd_toEndOf="@+id/viewBackground"
         app:layout_constraintStart_toStartOf="@+id/viewBackground"
         app:layout_constraintTop_toTopOf="parent" />

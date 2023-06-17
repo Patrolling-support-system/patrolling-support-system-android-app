@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -90,6 +91,13 @@ public class SubtaskDetailsActivity extends AppCompatActivity {
                                                             .putExtra("subtask_document", subtaskDocumentId)
                                                             .putExtra("checkpoint_latitude", checkpoint.getLatitude())
                                                             .putExtra("checkpoint_longitude", checkpoint.getLongitude())));
+                                        }
+                                        else {
+                                            btnAddReport.setOnClickListener(new View.OnClickListener() {
+                                                public void onClick(View v)  {
+                                                    Toast.makeText(getBaseContext(), "You have to be not more than 10 meters from checkpoint" , Toast.LENGTH_SHORT ).show();
+                                                }
+                                            });
                                         }
                                     }
                                 });
