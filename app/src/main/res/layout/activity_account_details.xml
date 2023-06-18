@@ -29,7 +29,7 @@
         android:layout_marginTop="35dp"
         android:layout_marginRight="40dp"
         android:layout_marginLeft="40dp"
-        android:background="@color/white"
+        android:background="@color/beige_bright"
         android:paddingVertical="5dp"
         android:paddingHorizontal="30dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -50,10 +50,9 @@
 
                 <TextView
                     android:id="@+id/labelName"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:maxWidth="50dp"
                     android:fontFamily="@font/signika_negative"
                     android:text="Name:"
                     android:textAlignment="viewStart"
@@ -62,12 +61,10 @@
 
                 <TextView
                     android:id="@+id/textViewName"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:fontFamily="@font/signika_negative"
-                    android:maxWidth="50dp"
-                    android:text="test"
                     android:textAlignment="gravity"
                     android:textColor="@color/green_800"
                     android:textSize="20sp" />
@@ -89,11 +86,10 @@
 
                 <TextView
                     android:id="@+id/labelSurname"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:fontFamily="@font/signika_negative"
-                    android:maxWidth="50dp"
                     android:text="Surname:"
                     android:textAlignment="viewStart"
                     android:textColor="@color/green_800"
@@ -101,12 +97,10 @@
 
                 <TextView
                     android:id="@+id/textViewSurname"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:fontFamily="@font/signika_negative"
-                    android:maxWidth="50dp"
-                    android:text="test"
                     android:textAlignment="gravity"
                     android:textColor="@color/green_800"
                     android:textSize="20sp" />
@@ -128,11 +122,10 @@
 
                 <TextView
                     android:id="@+id/labelEmailAddress"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:fontFamily="@font/signika_negative"
-                    android:maxWidth="50dp"
                     android:text="E-mail address:"
                     android:textAlignment="viewStart"
                     android:textColor="@color/green_800"
@@ -140,13 +133,11 @@
 
                 <TextView
                     android:id="@+id/textViewEmailAddress"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:fontFamily="@font/signika_negative"
-                    android:maxWidth="50dp"
                     android:paddingLeft="3dp"
-                    android:text="test"
                     android:textAlignment="gravity"
                     android:textColor="@color/green_800"
                     android:textSize="20sp" />
