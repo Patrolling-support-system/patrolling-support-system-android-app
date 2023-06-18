@@ -104,7 +104,7 @@ public class TaskDetailsActivity extends AppCompatActivity implements RecyclerVi
         ViewCompat.setNestedScrollingEnabled(rvCheckpointList, false);
         checkpointList = new ArrayList<>();
         checkpointNamesList = new ArrayList<>();
-        checkpointAdapter = new CheckpointAdapter(this, checkpointList, checkpointNamesList, this);
+        checkpointAdapter = new CheckpointAdapter(this, checkpointList, checkpointNamesList, taskDocumentId,this);
         rvCheckpointList.setAdapter(checkpointAdapter);
         rvCheckpointList.setLayoutManager(new LinearLayoutManager(this));
         rvCheckpointList.setHasFixedSize(true);

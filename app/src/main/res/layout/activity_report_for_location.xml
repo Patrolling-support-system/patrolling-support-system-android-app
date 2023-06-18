@@ -115,6 +115,7 @@
             android:layout_height="80dp"
             android:layout_weight="1"
             android:fontFamily="@font/signika_negative"
+            android:imeOptions="actionDone"
             android:hint="Note"
             android:textSize="15sp"
             tools:visibility="visible" />
