@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -55,7 +56,7 @@ public class TaskListActivity extends AppCompatActivity implements RecyclerViewI
     private void EventChangeListener() {
         fbDb.collection("Tasks")
                 .whereArrayContains("patrolParticipants", fbAuth.getCurrentUser().getUid())
-                .whereGreaterThanOrEqualTo("endDate", new Date(System.currentTimeMillis()))
+                .whereGreaterThanOrEqualTo("endDate", Timestamp.now())
                 .addSnapshotListener((value, error) -> {
                     if (error != null){
                         Log.e("Firestore error ", error.getMessage());
