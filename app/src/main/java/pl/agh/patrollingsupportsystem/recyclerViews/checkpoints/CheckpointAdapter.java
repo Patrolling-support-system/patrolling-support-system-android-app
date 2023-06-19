@@ -13,6 +13,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -28,16 +30,20 @@ import pl.agh.patrollingsupportsystem.recyclerViews.models.SubtaskExtended;
 
 public class CheckpointAdapter extends RecyclerView.Adapter<CheckpointAdapter.ViewHolder>{
     FirebaseFirestore fbDb = FirebaseFirestore.getInstance();
+    FirebaseAuth fbAuth = FirebaseAuth.getInstance();
+    String fbUserId = fbAuth.getCurrentUser().getUid();
     Context context;
     RecyclerViewInterface recyclerViewInterface;
     private List<GeoPoint> checkpoints;
     private List<String> checkpointNames;
+    private String taskId;
 
 
-    public CheckpointAdapter(Context context, List<GeoPoint> checkpoints, List<String> checkpointNames, RecyclerViewInterface recyclerViewInterface) {
+    public CheckpointAdapter(Context context, List<GeoPoint> checkpoints, List<String> checkpointNames, String taskId, RecyclerViewInterface recyclerViewInterface) {
         this.context = context;
         this.checkpoints = checkpoints;
         this.checkpointNames = checkpointNames;
+        this.taskId = taskId;
         this.recyclerViewInterface = recyclerViewInterface;
     }
 
@@ -59,7 +65,10 @@ public class CheckpointAdapter extends RecyclerView.Adapter<CheckpointAdapter.Vi
         holder.textViewCheckpointName.setText(checkpointNames.get(position));
         List<SubtaskExtended> subtasks = new ArrayList<>();
         SubtaskAdapter subtaskAdapter = new SubtaskAdapter(subtasks, holder.rvSubtasks.getContext());
-        fbDb.collection("CheckpointSubtasks").whereEqualTo("checkpoint", checkpoint)
+        fbDb.collection("CheckpointSubtasks")
+                .whereEqualTo("taskId", taskId)
+                .whereEqualTo("patrolParticipantId", fbUserId)
+                .whereEqualTo("checkpoint", checkpoint)
                 .get().addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         QuerySnapshot querySnapshot = task.getResult();

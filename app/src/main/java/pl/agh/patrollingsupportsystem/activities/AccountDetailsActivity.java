@@ -55,7 +55,7 @@ public class AccountDetailsActivity extends AppCompatActivity {
         tvEmailAddress.setText(userEmailAddress);
 
         //User collection query and values for fields
-        fbDb.collection("User").whereEqualTo("userId", userId).get().addOnCompleteListener(task -> {
+        fbDb.collection("Users").whereEqualTo("userId", userId).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 for (QueryDocumentSnapshot document : task.getResult()) {
 

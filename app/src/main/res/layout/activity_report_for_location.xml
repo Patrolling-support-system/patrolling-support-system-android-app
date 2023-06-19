@@ -103,21 +103,23 @@
         android:layout_width="match_parent"
         android:layout_height="70dp"
         android:layout_marginVertical="10dp"
-        android:background="#F9F2EC"
+        android:background="@color/beige_bright"
         android:layout_marginHorizontal="12dp"
         android:orientation="horizontal">
 
         <EditText
             android:id="@+id/editTextNote"
             android:layout_width="match_parent"
+            android:singleLine="false"
             android:layout_marginHorizontal="10dp"
-            android:layout_marginVertical="10dp"
-            android:layout_height="80dp"
+            android:layout_height="70dp"
             android:layout_weight="1"
             android:fontFamily="@font/signika_negative"
+            android:imeOptions="actionDone"
+            android:scrollHorizontally="false"
             android:hint="Note"
             android:textSize="15sp"
-            tools:visibility="visible" />
+            android:backgroundTint="@color/green_400" />
 
     </LinearLayout>
 
