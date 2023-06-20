@@ -176,12 +176,8 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         QuerySnapshot qquery = task.getResult();
-                        System.out.println("1");
                         if (!qquery.isEmpty()) {
-                            System.out.println("2");
                             for (DocumentSnapshot doc : qquery.getDocuments()) {
-                                System.out.println("3");
-                                System.out.println(markers);
                                 GeoPoint point = (GeoPoint) doc.get("checkpoint");
                                 String snippet = (String) doc.get("subtaskName");
                                 String participantId = ((String) doc.get("patrolParticipantId")).replaceAll("\\s", "");
