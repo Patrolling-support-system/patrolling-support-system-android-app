@@ -160,7 +160,6 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                                         .alpha(0.9F)
                                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
                                 markers.put(checkpoints.get(i), marker);
-                                System.out.println(markers);
                             }
 
                         } else {
@@ -177,28 +176,21 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                     if (task.isSuccessful()) {
                         QuerySnapshot qquery = task.getResult();
                         if (!qquery.isEmpty()) {
-                            System.out.println("istnieje!!!!");
                             for (DocumentSnapshot doc : qquery.getDocuments()) {
                                 GeoPoint point = (GeoPoint) doc.get("checkpoint");
                                 String snippet = (String) doc.get("subtaskName");
                                 String participantId = ((String) doc.get("participant")).replaceAll("\\s", "");
                                 MarkerOptions marker = markers.get(point);
                                 if (marker != null && snippet != null && participantId.equalsIgnoreCase(userId)) {
-                                    System.out.println("dodawanie");
-                                    System.out.println(marker.getTitle());
                                     if (marker.getSnippet() != null) {
                                         String newSnippet = marker.getSnippet()+ "\n" + snippet;
                                         marker.snippet(newSnippet);
                                     } else {
                                         marker.snippet(snippet);
                                     }
-                                    System.out.println(marker.getSnippet());
                                 }
                             }
-                            System.out.println("markery");
                             for (MarkerOptions marker : markers.values()) {
-                                System.out.println(marker.getTitle());
-                                System.out.println(marker.getSnippet());
                                 map.addMarker(marker);
                             }
                             map.setInfoWindowAdapter(new CheckpointInfoWindowAdapter(MapsActivityCurrentPlace.this));
