@@ -82,7 +82,6 @@ public class SubtaskDetailsActivity extends AppCompatActivity {
                                         GeoPoint currLocation = new GeoPoint(location.getLatitude(), location.getLongitude());
                                         double distance = distanceInMeters(currLocation.getLatitude(), currLocation.getLongitude(),
                                                 checkpoint.getLatitude(), checkpoint.getLongitude());
-                                        System.out.println(distance);
                                         if (distance < 10.0) {
                                             // trzeba przebudować report, żeby przyjmował koordynaty checkpointa, jeśli przekazano null to wtedy z obecną lokalizacją
                                             btnAddReport.setOnClickListener(v ->

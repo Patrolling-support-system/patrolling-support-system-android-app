@@ -334,11 +334,11 @@ public class ReportForLocationActivity extends AppCompatActivity {
                     checkpointReport.put("note", note);
                     checkpointReport.put("images", imageReferenceList);
                     checkpointReport.put("recordings", audioRecordingReferenceList);
-                    checkpointReport.put("patrolParticipant", fbAuthUser);
-                    checkpointReport.put("task", finalTaskDocumentId);
+                    checkpointReport.put("patrolParticipantId", fbAuthUser);
+                    checkpointReport.put("taskId", finalTaskDocumentId);
                     checkpointReport.put("subtaskId", finalSubtaskDocumentId);
 
-                    fbDb.collection("CheckpointReport").document(reportDocumentId)
+                    fbDb.collection("Reports").document(reportDocumentId)
                             .set(checkpointReport)
                             .addOnSuccessListener(aVoid -> {Log.d(TAG, "DocumentSnapshot written");})
                             .addOnFailureListener(e -> Log.w(TAG, "Error adding document", e));

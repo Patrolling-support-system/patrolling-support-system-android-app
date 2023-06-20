@@ -85,7 +85,6 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
 
         db = FirebaseFirestore.getInstance();
 
-
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         Places.initialize(getApplicationContext(), BuildConfig.MAPS_API_KEY);
         locationRequest = getLocationRequest();
@@ -172,7 +171,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                     }
                 });
 
-        db.collection("CheckpointSubtasks").whereEqualTo("task", taskId)
+        db.collection("CheckpointSubtasks").whereEqualTo("taskId", taskId)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -221,7 +220,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
     private void showRoute() {
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-        db.collection("Point").whereEqualTo("taskId", taskId)
+        db.collection("RoutePoint").whereEqualTo("taskId", taskId)
                 .get()
                 .addOnCompleteListener(task -> {
                     Map<Timestamp, LatLng> map1 = new HashMap<>();
@@ -230,13 +229,13 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                         QuerySnapshot qquery = task.getResult();
                         if (!qquery.isEmpty()) {
                             for (DocumentSnapshot doc : qquery.getDocuments()) {
-                                String participantId = (String) doc.get("patrollingMemberId");
+                                String participantId = (String) doc.get("patrolParticipantId");
                                 assert participantId != null;
                                 if (participantId.equalsIgnoreCase(userId)) {
                                     GeoPoint geoPoint = (GeoPoint) doc.get("location");
                                     assert geoPoint != null;
                                     LatLng latLng = new LatLng(geoPoint.getLatitude(), geoPoint.getLongitude());
-                                    map1.put((Timestamp) doc.get("time"), latLng);
+                                    map1.put((Timestamp) doc.get("date"), latLng);
                                 }
                             }
                             List<Timestamp> time = new ArrayList<>(map1.keySet());
@@ -287,11 +286,11 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
 
         Map<String, Object> checkpointReport = new HashMap<>();
         checkpointReport.put("location", currLocation);
-        checkpointReport.put("patrollingMemberId", userId);
+        checkpointReport.put("patrolParticipantId", userId);
         checkpointReport.put("taskId", taskId);
-        checkpointReport.put("time", Timestamp.now());
+        checkpointReport.put("date", Timestamp.now());
 
-        db.collection("Point").add(checkpointReport)
+        db.collection("RoutePoint").add(checkpointReport)
                 .addOnSuccessListener(aVoid -> {
                     Log.d(TAG, "DocumentSnapshot written");
                 })
