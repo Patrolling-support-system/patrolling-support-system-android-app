@@ -160,6 +160,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                                         .alpha(0.9F)
                                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
                                 markers.put(checkpoints.get(i), marker);
+                                System.out.println(marker);
                             }
 
                         } else {
@@ -175,13 +176,18 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         QuerySnapshot qquery = task.getResult();
+                        System.out.println("1");
                         if (!qquery.isEmpty()) {
+                            System.out.println("2");
                             for (DocumentSnapshot doc : qquery.getDocuments()) {
+                                System.out.println("3");
+                                System.out.println(markers);
                                 GeoPoint point = (GeoPoint) doc.get("checkpoint");
                                 String snippet = (String) doc.get("subtaskName");
-                                String participantId = ((String) doc.get("participant")).replaceAll("\\s", "");
+                                String participantId = ((String) doc.get("patrolParticipantId")).replaceAll("\\s", "");
                                 MarkerOptions marker = markers.get(point);
                                 if (marker != null && snippet != null && participantId.equalsIgnoreCase(userId)) {
+                                    System.out.println("4");
                                     if (marker.getSnippet() != null) {
                                         String newSnippet = marker.getSnippet()+ "\n" + snippet;
                                         marker.snippet(newSnippet);
@@ -276,13 +282,13 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         GeoPoint currLocation = new GeoPoint(location.getLatitude(), location.getLongitude());
 
-        Map<String, Object> checkpointReport = new HashMap<>();
-        checkpointReport.put("location", currLocation);
-        checkpointReport.put("patrolParticipantId", userId);
-        checkpointReport.put("taskId", taskId);
-        checkpointReport.put("date", Timestamp.now());
+        Map<String, Object> routePoint = new HashMap<>();
+        routePoint.put("location", currLocation);
+        routePoint.put("patrolParticipantId", userId);
+        routePoint.put("taskId", taskId);
+        routePoint.put("date", Timestamp.now());
 
-        db.collection("RoutePoint").add(checkpointReport)
+        db.collection("RoutePoint").add(routePoint)
                 .addOnSuccessListener(aVoid -> {
                     Log.d(TAG, "DocumentSnapshot written");
                 })

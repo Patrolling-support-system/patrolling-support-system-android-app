@@ -47,17 +47,13 @@ public class CheckpointInfoWindowAdapter extends AppCompatActivity implements Go
         TextView tvTitle = (TextView) v.findViewById(R.id.checkpointTitle);
         TextView tvSubtasks = (TextView) v.findViewById(R.id.subtasks);
 
-        System.out.println("Info Info");
-
         if (title != null && !title.equals("")) {
             tvTitle.setText(title);
-            System.out.println(title);
         } else {
             tvTitle.setText("");
         }
         if (subtasks != null && !subtasks.equals("")) {
             tvSubtasks.setText(subtasks);
-            System.out.println(subtasks);
         } else {
             tvSubtasks.setText("");
         }
