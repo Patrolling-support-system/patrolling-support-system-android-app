@@ -3,6 +3,7 @@ package pl.agh.patrollingsupportsystem.activities;
 import static android.content.ContentValues.TAG;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -42,7 +43,6 @@ import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +50,7 @@ import java.util.Map;
 
 import pl.agh.patrollingsupportsystem.BuildConfig;
 import pl.agh.patrollingsupportsystem.R;
+import pl.agh.patrollingsupportsystem.activities.map.CheckpointInfoWindowAdapter;
 
 public class MapsActivityCurrentPlace extends AppCompatActivity
         implements OnMapReadyCallback, ActivityCompat.OnRequestPermissionsResultCallback {
@@ -151,12 +152,16 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
                         if (document.exists()) {
-                            for (GeoPoint point : (List<GeoPoint>) document.get("checkpoints")) {
+                            List<GeoPoint> checkpoints = (List<GeoPoint>) document.get("checkpoints");
+                            List<String> checkpointNames = (List<String>) document.get("checkpointNames");
+                            for (int i=0; i<checkpoints.size(); i++) {
                                 MarkerOptions marker = new MarkerOptions()
-                                        .position(new LatLng(point.getLatitude(), point.getLongitude()))
+                                        .position(new LatLng(checkpoints.get(i).getLatitude(), checkpoints.get(i).getLongitude()))
+                                        .title(checkpointNames.get(i))
                                         .alpha(0.9F)
                                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-                                markers.put(point, marker);
+                                markers.put(checkpoints.get(i), marker);
+                                System.out.println(markers);
                             }
 
                         } else {
@@ -173,25 +178,37 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                     if (task.isSuccessful()) {
                         QuerySnapshot qquery = task.getResult();
                         if (!qquery.isEmpty()) {
-                            Map<GeoPoint, String> titles = new HashMap<>();
+                            System.out.println("istnieje!!!!");
                             for (DocumentSnapshot doc : qquery.getDocuments()) {
                                 GeoPoint point = (GeoPoint) doc.get("checkpoint");
-                                String title = (String) doc.get("subtaskName");
+                                String snippet = (String) doc.get("subtaskName");
                                 String participantId = ((String) doc.get("participant")).replaceAll("\\s", "");
-                                if (markers.containsKey(point) && title != null && participantId.equalsIgnoreCase(userId)) {
-                                    if (titles.containsKey(point)) {
-                                        String newTitle = titles.get(point) + "\n" + title;
-                                        titles.replace(point, newTitle);
+                                MarkerOptions marker = markers.get(point);
+                                if (marker != null && snippet != null && participantId.equalsIgnoreCase(userId)) {
+                                    System.out.println("dodawanie");
+                                    System.out.println(marker.getTitle());
+                                    if (marker.getSnippet() != null) {
+                                        String newSnippet = marker.getSnippet()+ "\n" + snippet;
+                                        marker.snippet(newSnippet);
                                     } else {
-                                        titles.put(point, title);
+                                        marker.snippet(snippet);
                                     }
+                                    System.out.println(marker.getSnippet());
                                 }
                             }
+                            System.out.println("markery");
                             for (MarkerOptions marker : markers.values()) {
-                                LatLng p = marker.getPosition();
-                                GeoPoint pp = new GeoPoint(p.latitude, p.longitude);
-                                map.addMarker(marker.title(titles.get(pp)));
+                                System.out.println(marker.getTitle());
+                                System.out.println(marker.getSnippet());
+                                map.addMarker(marker);
                             }
+                            map.setInfoWindowAdapter(new CheckpointInfoWindowAdapter(MapsActivityCurrentPlace.this));
+                            map.setOnInfoWindowClickListener(v -> startActivity(new Intent(MapsActivityCurrentPlace.this, SubtaskListActivity.class)
+                                    .putExtra("checkpoint_latitude", v.getPosition().latitude)
+                                    .putExtra("checkpoint_longitude", v.getPosition().longitude)
+                                    .putExtra("task_document", taskId)
+                                    .putExtra("checkpoint_name", v.getTitle())));
+
                         } else {
                             Toast.makeText(this, "Document doesn't exist - Exception: " + task.getException(), Toast.LENGTH_LONG).show();
                         }
@@ -228,7 +245,6 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                                 points.add(map1.get(t));
                             }
                             LatLng[] list = points.toArray(new LatLng[0]);
-                            System.out.println(Arrays.toString(list));
                             Polyline polyline = map.addPolyline(new PolylineOptions()
                                     .clickable(false)
                                     .add(list));

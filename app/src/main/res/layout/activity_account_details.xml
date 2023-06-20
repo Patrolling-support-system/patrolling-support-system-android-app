@@ -162,7 +162,7 @@
         android:layout_height="48dp"
         android:backgroundTint="@color/green_200"
         android:fontFamily="@font/signika_negative"
-        android:text="I want to change my password..."
+        android:text="I want to change my password"
         android:textColor="@color/green_800"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

@@ -54,8 +54,8 @@ public class TaskListActivity extends AppCompatActivity implements RecyclerViewI
 
     private void EventChangeListener() {
         fbDb.collection("Tasks")
-                .whereArrayContains("patrolParticipants", fbAuth.getCurrentUser().getUid())
                 .whereGreaterThanOrEqualTo("endDate", new Date(System.currentTimeMillis()))
+                .whereArrayContains("patrolParticipants", fbAuth.getCurrentUser().getUid())
                 .addSnapshotListener((value, error) -> {
                     if (error != null){
                         Log.e("Firestore error ", error.getMessage());
