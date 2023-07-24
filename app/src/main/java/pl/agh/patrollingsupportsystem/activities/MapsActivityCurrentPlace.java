@@ -12,6 +12,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -38,8 +39,11 @@ import com.google.android.libraries.places.api.Places;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
@@ -62,11 +66,11 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
     // A default location (Poland, Cracow) and default zoom to use when location permission is
     // not granted.
     private final LatLng defaultLocation = new LatLng(50.06192492003556, 19.93918752197243);
-    private static final int DEFAULT_ZOOM = 15;
+    private static final int DEFAULT_ZOOM = 18;
     private static final int PERMISSION_FINE_LOCATION = 1;
     private LocationRequest locationRequest;
-    private static final long MIN_TIME = 60000;
-    private static final long MIN_DISTANCE = 5;
+    private static final long MIN_TIME = 5000;
+    private static final long MIN_DISTANCE = 1;
     LocationCallback locationCallback;
     private String taskId;
     private static final int COLOR_GREEN_ARGB = 0xffa9ac5d;
@@ -118,7 +122,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                 @Override
                 public void onSuccess(Location location) {
                     updateLocationUI(locationCall);
-                    sentLocationToFirebase(locationCall);
+//                    sentLocationToFirebase(locationCall);
                 }
             });
         } else {
@@ -153,14 +157,13 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                         if (document.exists()) {
                             List<GeoPoint> checkpoints = (List<GeoPoint>) document.get("checkpoints");
                             List<String> checkpointNames = (List<String>) document.get("checkpointNames");
-                            for (int i=0; i<checkpoints.size(); i++) {
+                            for (int i = 0; i < checkpoints.size(); i++) {
                                 MarkerOptions marker = new MarkerOptions()
                                         .position(new LatLng(checkpoints.get(i).getLatitude(), checkpoints.get(i).getLongitude()))
                                         .title(checkpointNames.get(i))
                                         .alpha(0.9F)
                                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
                                 markers.put(checkpoints.get(i), marker);
-                                System.out.println(marker);
                             }
 
                         } else {
@@ -185,7 +188,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                                 if (marker != null && snippet != null && participantId.equalsIgnoreCase(userId)) {
                                     System.out.println("4");
                                     if (marker.getSnippet() != null) {
-                                        String newSnippet = marker.getSnippet()+ "\n" + snippet;
+                                        String newSnippet = marker.getSnippet() + "\n" + snippet;
                                         marker.snippet(newSnippet);
                                     } else {
                                         marker.snippet(snippet);
@@ -213,40 +216,39 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
 
     private void showRoute() {
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
         db.collection("RoutePoint").whereEqualTo("taskId", taskId)
-                .get()
-                .addOnCompleteListener(task -> {
-                    Map<Timestamp, LatLng> map1 = new HashMap<>();
-                    List<LatLng> points = new ArrayList<>();
-                    if (task.isSuccessful()) {
-                        QuerySnapshot qquery = task.getResult();
-                        if (!qquery.isEmpty()) {
-                            for (DocumentSnapshot doc : qquery.getDocuments()) {
-                                String participantId = (String) doc.get("patrolParticipantId");
-                                assert participantId != null;
-                                if (participantId.equalsIgnoreCase(userId)) {
-                                    GeoPoint geoPoint = (GeoPoint) doc.get("location");
-                                    assert geoPoint != null;
-                                    LatLng latLng = new LatLng(geoPoint.getLatitude(), geoPoint.getLongitude());
-                                    map1.put((Timestamp) doc.get("date"), latLng);
-                                }
-                            }
-                            List<Timestamp> time = new ArrayList<>(map1.keySet());
-                            Collections.sort(time);
-                            for (Timestamp t : time) {
-                                points.add(map1.get(t));
-                            }
-                            LatLng[] list = points.toArray(new LatLng[0]);
-                            Polyline polyline = map.addPolyline(new PolylineOptions()
-                                    .clickable(false)
-                                    .add(list));
-                            polyline.setColor(COLOR_GREEN_ARGB);
-                        } else {
-                            Toast.makeText(this, "Document doesn't exist - Exception: " + task.getException(), Toast.LENGTH_LONG).show();
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value,
+                                        @Nullable FirebaseFirestoreException e) {
+                        if (e != null) {
+                            Log.w(TAG, "Listen failed.", e);
+                            return;
                         }
-                    } else {
-                        Toast.makeText(this, "Cannot fetch the data - Exception: " + task.getException(), Toast.LENGTH_LONG).show();
+
+                        Map<Timestamp, LatLng> map1 = new HashMap<>();
+                        List<LatLng> points = new ArrayList<>();
+                        for (QueryDocumentSnapshot doc : value) {
+                            String participantId = (String) doc.get("patrolParticipantId");
+                            assert participantId != null;
+                            if (participantId.equalsIgnoreCase(userId)) {
+                                GeoPoint geoPoint = (GeoPoint) doc.get("location");
+                                assert geoPoint != null;
+                                LatLng latLng = new LatLng(geoPoint.getLatitude(), geoPoint.getLongitude());
+                                map1.put((Timestamp) doc.get("date"), latLng);
+                            }
+                        }
+                        List<Timestamp> time = new ArrayList<>(map1.keySet());
+                        Collections.sort(time);
+                        for (Timestamp t : time) {
+                            points.add(map1.get(t));
+                        }
+                        LatLng[] list = points.toArray(new LatLng[0]);
+                        Polyline polyline = map.addPolyline(new PolylineOptions()
+                                .clickable(false)
+                                .add(list));
+                        polyline.setColor(COLOR_GREEN_ARGB);
+
                     }
                 });
     }
