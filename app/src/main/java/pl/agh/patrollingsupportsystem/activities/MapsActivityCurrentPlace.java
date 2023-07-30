@@ -158,9 +158,9 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                             List<GeoPoint> checkpoints = (List<GeoPoint>) document.get("checkpoints");
                             List<String> checkpointNames = (List<String>) document.get("checkpointNames");
                             for (int i = 0; i < checkpoints.size(); i++) {
-                                MarkerOptions marker = new MarkerOptions()
+                                @SuppressLint("DefaultLocale") MarkerOptions marker = new MarkerOptions()
                                         .position(new LatLng(checkpoints.get(i).getLatitude(), checkpoints.get(i).getLongitude()))
-                                        .title(checkpointNames.get(i))
+                                        .title(String.format("%d. %s", i+1,  checkpointNames.get(i)))
                                         .alpha(0.9F)
                                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
                                 markers.put(checkpoints.get(i), marker);
@@ -186,7 +186,6 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                                 String participantId = ((String) doc.get("patrolParticipantId")).replaceAll("\\s", "");
                                 MarkerOptions marker = markers.get(point);
                                 if (marker != null && snippet != null && participantId.equalsIgnoreCase(userId)) {
-                                    System.out.println("4");
                                     if (marker.getSnippet() != null) {
                                         String newSnippet = marker.getSnippet() + "\n" + snippet;
                                         marker.snippet(newSnippet);
@@ -204,6 +203,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                                     .putExtra("checkpoint_longitude", v.getPosition().longitude)
                                     .putExtra("task_document", taskId)
                                     .putExtra("checkpoint_name", v.getTitle())));
+
 
                         } else {
                             Toast.makeText(this, "Document doesn't exist - Exception: " + task.getException(), Toast.LENGTH_LONG).show();
