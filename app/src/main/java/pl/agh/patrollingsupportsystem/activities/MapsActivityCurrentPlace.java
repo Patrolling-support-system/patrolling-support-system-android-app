@@ -69,8 +69,8 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
     private static final int DEFAULT_ZOOM = 18;
     private static final int PERMISSION_FINE_LOCATION = 1;
     private LocationRequest locationRequest;
-    private static final long MIN_TIME = 5000;
-    private static final long MIN_DISTANCE = 1;
+    private static final long MIN_TIME = 10000;
+    private static final long MIN_DISTANCE = 5;
     LocationCallback locationCallback;
     private String taskId;
     private static final int COLOR_GREEN_ARGB = 0xffa9ac5d;
@@ -122,7 +122,7 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                 @Override
                 public void onSuccess(Location location) {
                     updateLocationUI(locationCall);
-//                    sentLocationToFirebase(locationCall);
+                    sentLocationToFirebase(locationCall);
                 }
             });
         } else {
