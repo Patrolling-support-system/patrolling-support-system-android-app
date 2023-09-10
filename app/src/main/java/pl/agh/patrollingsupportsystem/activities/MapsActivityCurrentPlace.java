@@ -201,37 +201,37 @@ public class MapsActivityCurrentPlace extends AppCompatActivity implements OnMap
 
     private void showRoute() {
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        db.collection("RoutePoint").whereEqualTo("taskId", taskId).addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException e) {
-                if (e != null) {
-                    Log.w(TAG, "Listen failed.", e);
-                    return;
+        db.collection("RoutePoint")
+                .whereEqualTo("taskId", taskId)
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException e) {
+                        if (e != null) {
+                            Log.w(TAG, "Listen failed.", e);
+                            return;
+                        }
+                        Map<Timestamp, LatLng> map1 = new HashMap<>();
+                        List<LatLng> points = new ArrayList<>();
+                        for (QueryDocumentSnapshot doc : value) {
+                            String participantId = (String) doc.get("patrolParticipantId");
+                            assert participantId != null;
+                            if (participantId.equalsIgnoreCase(userId)) {
+                                GeoPoint geoPoint = (GeoPoint) doc.get("location");
+                                assert geoPoint != null;
+                                LatLng latLng = new LatLng(geoPoint.getLatitude(), geoPoint.getLongitude());
+                                map1.put((Timestamp) doc.get("date"), latLng);
+                            }
+                        }
+                        List<Timestamp> time = new ArrayList<>(map1.keySet());
+                        Collections.sort(time);
+                        for (Timestamp t : time) {
+                            points.add(map1.get(t));
+                        }
+                        LatLng[] list = points.toArray(new LatLng[0]);
+                        Polyline polyline = map.addPolyline(new PolylineOptions().clickable(false).add(list));
+                        polyline.setColor(COLOR_GREEN_ARGB);
                 }
-
-                Map<Timestamp, LatLng> map1 = new HashMap<>();
-                List<LatLng> points = new ArrayList<>();
-                for (QueryDocumentSnapshot doc : value) {
-                    String participantId = (String) doc.get("patrolParticipantId");
-                    assert participantId != null;
-                    if (participantId.equalsIgnoreCase(userId)) {
-                        GeoPoint geoPoint = (GeoPoint) doc.get("location");
-                        assert geoPoint != null;
-                        LatLng latLng = new LatLng(geoPoint.getLatitude(), geoPoint.getLongitude());
-                        map1.put((Timestamp) doc.get("date"), latLng);
-                    }
-                }
-                List<Timestamp> time = new ArrayList<>(map1.keySet());
-                Collections.sort(time);
-                for (Timestamp t : time) {
-                    points.add(map1.get(t));
-                }
-                LatLng[] list = points.toArray(new LatLng[0]);
-                Polyline polyline = map.addPolyline(new PolylineOptions().clickable(false).add(list));
-                polyline.setColor(COLOR_GREEN_ARGB);
-
-            }
-        });
+            });
     }
 
     @SuppressLint("MissingPermission")
@@ -247,7 +247,8 @@ public class MapsActivityCurrentPlace extends AppCompatActivity implements OnMap
         try {
             map.setMyLocationEnabled(true);
             map.getUiSettings().setMyLocationButtonEnabled(true);
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), DEFAULT_ZOOM));
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(),
+                    location.getLongitude()), DEFAULT_ZOOM));
         } catch (SecurityException e) {
             Log.e("Exception: %s", e.getMessage());
         }
@@ -269,11 +270,14 @@ public class MapsActivityCurrentPlace extends AppCompatActivity implements OnMap
     }
 
     protected LocationRequest getLocationRequest() {
-        return new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, MIN_TIME).setMinUpdateDistanceMeters(MIN_DISTANCE).build();
+        return new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, MIN_TIME)
+                .setMinUpdateDistanceMeters(MIN_DISTANCE)
+                .build();
     }
 
     private boolean hasLocationPermission() {
-        return ContextCompat.checkSelfPermission(this.getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        return ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
 }
