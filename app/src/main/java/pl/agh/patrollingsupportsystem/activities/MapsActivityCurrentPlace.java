@@ -18,7 +18,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.Granularity;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
@@ -35,7 +34,6 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-import com.google.android.libraries.places.api.Places;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -52,12 +50,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import pl.agh.patrollingsupportsystem.BuildConfig;
 import pl.agh.patrollingsupportsystem.R;
 import pl.agh.patrollingsupportsystem.activities.map.CheckpointInfoWindowAdapter;
 
-public class MapsActivityCurrentPlace extends AppCompatActivity
-        implements OnMapReadyCallback, ActivityCompat.OnRequestPermissionsResultCallback {
+public class MapsActivityCurrentPlace extends AppCompatActivity implements OnMapReadyCallback, ActivityCompat.OnRequestPermissionsResultCallback {
 
     private GoogleMap map;
     private FusedLocationProviderClient fusedLocationProviderClient;
@@ -90,16 +86,17 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         db = FirebaseFirestore.getInstance();
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-        Places.initialize(getApplicationContext(), BuildConfig.MAPS_API_KEY);
         locationRequest = getLocationRequest();
 
-        beginUpdates();
-
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
 
         assert mapFragment != null;
         mapFragment.getMapAsync(this);
+
+        if (!hasLocationPermission()) {
+            getPermissionAndUpdateLocation();
+        }
+        beginUpdates();
     }
 
     @SuppressLint("MissingPermission")
@@ -116,26 +113,26 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
     }
 
     @SuppressLint("MissingPermission")
-    private void updateLocation(Location locationCall) {
-        if (hasLocationPermission()) {
+    private void getPermissionAndUpdateLocation() {
+        ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_FINE_LOCATION);
+        if (map != null) {
             fusedLocationProviderClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
                 @Override
                 public void onSuccess(Location location) {
-                    updateLocationUI(locationCall);
-                    sentLocationToFirebase(locationCall);
+                    updateLocationUI(location);
+                    sentLocationToFirebase(location);
                 }
             });
-        } else {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSION_FINE_LOCATION);
-            if (map != null) {
-                map.setMyLocationEnabled(false);
-                map.getUiSettings().setMyLocationButtonEnabled(false);
-                map.moveCamera(CameraUpdateFactory
-                        .newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
-            }
+            map.setMyLocationEnabled(true);
+            map.getUiSettings().setMyLocationButtonEnabled(true);
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
         }
+    }
+
+    @SuppressLint("MissingPermission")
+    private void updateLocation(Location locationCall) {
+        sentLocationToFirebase(locationCall);
+        updateLocationUI(locationCall);
     }
 
     @SuppressLint({"MissingPermission", "ServiceCast"})
@@ -149,83 +146,70 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
     private void setCheckpointsOnMap() {
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         Map<GeoPoint, MarkerOptions> markers = new HashMap<>();
-        db.collection("Tasks").document(taskId)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        DocumentSnapshot document = task.getResult();
-                        if (document.exists()) {
-                            List<GeoPoint> checkpoints = (List<GeoPoint>) document.get("checkpoints");
-                            List<String> checkpointNames = (List<String>) document.get("checkpointNames");
-                            for (int i = 0; i < checkpoints.size(); i++) {
-                                @SuppressLint("DefaultLocale") MarkerOptions marker = new MarkerOptions()
-                                        .position(new LatLng(checkpoints.get(i).getLatitude(), checkpoints.get(i).getLongitude()))
-                                        .title(String.format("%d. %s", i+1,  checkpointNames.get(i)))
-                                        .alpha(0.9F)
-                                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-                                markers.put(checkpoints.get(i), marker);
-                            }
-
-                        } else {
-                            Toast.makeText(this, "Document doesn't exist - Exception: " + task.getException(), Toast.LENGTH_LONG).show();
-                        }
-                    } else {
-                        Toast.makeText(this, "Cannot fetch the data - Exception: " + task.getException(), Toast.LENGTH_LONG).show();
+        db.collection("Tasks").document(taskId).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                DocumentSnapshot document = task.getResult();
+                if (document.exists()) {
+                    List<GeoPoint> checkpoints = (List<GeoPoint>) document.get("checkpoints");
+                    List<String> checkpointNames = (List<String>) document.get("checkpointNames");
+                    for (int i = 0; i < checkpoints.size(); i++) {
+                        @SuppressLint("DefaultLocale") MarkerOptions marker = new MarkerOptions().position(new LatLng(checkpoints.get(i).getLatitude(), checkpoints.get(i).getLongitude())).title(String.format("%d. %s", i + 1, checkpointNames.get(i))).alpha(0.9F).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                        markers.put(checkpoints.get(i), marker);
                     }
-                });
 
-        db.collection("CheckpointSubtasks").whereEqualTo("taskId", taskId)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        QuerySnapshot qquery = task.getResult();
-                        if (!qquery.isEmpty()) {
-                            for (DocumentSnapshot doc : qquery.getDocuments()) {
-                                GeoPoint point = (GeoPoint) doc.get("checkpoint");
-                                String snippet = (String) doc.get("subtaskName");
-                                String participantId = ((String) doc.get("patrolParticipantId")).replaceAll("\\s", "");
-                                MarkerOptions marker = markers.get(point);
-                                if (marker != null && snippet != null && participantId.equalsIgnoreCase(userId)) {
-                                    if (marker.getSnippet() != null) {
-                                        String newSnippet = marker.getSnippet() + "\n" + snippet;
-                                        marker.snippet(newSnippet);
-                                    } else {
-                                        marker.snippet(snippet);
-                                    }
-                                }
+                } else {
+                    Toast.makeText(this, "Document doesn't exist - Exception: " + task.getException(), Toast.LENGTH_LONG).show();
+                }
+            } else {
+                Toast.makeText(this, "Cannot fetch the data - Exception: " + task.getException(), Toast.LENGTH_LONG).show();
+            }
+        });
+
+        db.collection("CheckpointSubtasks").whereEqualTo("taskId", taskId).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                QuerySnapshot qquery = task.getResult();
+                if (!qquery.isEmpty()) {
+                    for (DocumentSnapshot doc : qquery.getDocuments()) {
+                        GeoPoint point = (GeoPoint) doc.get("checkpoint");
+                        String snippet = (String) doc.get("subtaskName");
+                        String participantId = ((String) doc.get("patrolParticipantId")).replaceAll("\\s", "");
+                        MarkerOptions marker = markers.get(point);
+                        if (marker != null && snippet != null && participantId.equalsIgnoreCase(userId)) {
+                            if (marker.getSnippet() != null) {
+                                String newSnippet = marker.getSnippet() + "\n" + snippet;
+                                marker.snippet(newSnippet);
+                            } else {
+                                marker.snippet(snippet);
                             }
-                            for (MarkerOptions marker : markers.values()) {
-                                map.addMarker(marker);
-                            }
-                            map.setInfoWindowAdapter(new CheckpointInfoWindowAdapter(MapsActivityCurrentPlace.this));
-                            map.setOnInfoWindowClickListener(v -> startActivity(new Intent(MapsActivityCurrentPlace.this, SubtaskListActivity.class)
-                                    .putExtra("checkpoint_latitude", v.getPosition().latitude)
-                                    .putExtra("checkpoint_longitude", v.getPosition().longitude)
-                                    .putExtra("task_document", taskId)
-                                    .putExtra("checkpoint_name", v.getTitle())));
-
-
-                        } else {
-                            Toast.makeText(this, "Document doesn't exist - Exception: " + task.getException(), Toast.LENGTH_LONG).show();
                         }
-                    } else {
-                        Toast.makeText(this, "Cannot fetch the data - Exception: " + task.getException(), Toast.LENGTH_LONG).show();
                     }
-                });
+                    for (MarkerOptions marker : markers.values()) {
+                        map.addMarker(marker);
+                    }
+                    map.setInfoWindowAdapter(new CheckpointInfoWindowAdapter(MapsActivityCurrentPlace.this));
+                    map.setOnInfoWindowClickListener(v -> startActivity(new Intent(MapsActivityCurrentPlace.this, SubtaskListActivity.class).putExtra("checkpoint_latitude", v.getPosition().latitude).putExtra("checkpoint_longitude", v.getPosition().longitude).putExtra("task_document", taskId).putExtra("checkpoint_name", v.getTitle())));
+
+
+                } else {
+                    Toast.makeText(this, "Document doesn't exist - Exception: " + task.getException(), Toast.LENGTH_LONG).show();
+                }
+            } else {
+                Toast.makeText(this, "Cannot fetch the data - Exception: " + task.getException(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void showRoute() {
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        db.collection("RoutePoint").whereEqualTo("taskId", taskId)
+        db.collection("RoutePoint")
+                .whereEqualTo("taskId", taskId)
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
-                    public void onEvent(@Nullable QuerySnapshot value,
-                                        @Nullable FirebaseFirestoreException e) {
+                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException e) {
                         if (e != null) {
                             Log.w(TAG, "Listen failed.", e);
                             return;
                         }
-
                         Map<Timestamp, LatLng> map1 = new HashMap<>();
                         List<LatLng> points = new ArrayList<>();
                         for (QueryDocumentSnapshot doc : value) {
@@ -244,20 +228,15 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
                             points.add(map1.get(t));
                         }
                         LatLng[] list = points.toArray(new LatLng[0]);
-                        Polyline polyline = map.addPolyline(new PolylineOptions()
-                                .clickable(false)
-                                .add(list));
+                        Polyline polyline = map.addPolyline(new PolylineOptions().clickable(false).add(list));
                         polyline.setColor(COLOR_GREEN_ARGB);
-
-                    }
-                });
+                }
+            });
     }
 
     @SuppressLint("MissingPermission")
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
@@ -268,9 +247,8 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         try {
             map.setMyLocationEnabled(true);
             map.getUiSettings().setMyLocationButtonEnabled(true);
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(location.getLatitude(),
-                            location.getLongitude()), DEFAULT_ZOOM));
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(),
+                    location.getLongitude()), DEFAULT_ZOOM));
         } catch (SecurityException e) {
             Log.e("Exception: %s", e.getMessage());
         }
@@ -286,18 +264,14 @@ public class MapsActivityCurrentPlace extends AppCompatActivity
         routePoint.put("taskId", taskId);
         routePoint.put("date", Timestamp.now());
 
-        db.collection("RoutePoint").add(routePoint)
-                .addOnSuccessListener(aVoid -> {
-                    Log.d(TAG, "DocumentSnapshot written");
-                })
-                .addOnFailureListener(e -> Log.w(TAG, "Error adding document", e));
+        db.collection("RoutePoint").add(routePoint).addOnSuccessListener(aVoid -> {
+            Log.d(TAG, "DocumentSnapshot written");
+        }).addOnFailureListener(e -> Log.w(TAG, "Error adding document", e));
     }
 
     protected LocationRequest getLocationRequest() {
         return new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, MIN_TIME)
                 .setMinUpdateDistanceMeters(MIN_DISTANCE)
-                .setGranularity(Granularity.GRANULARITY_PERMISSION_LEVEL)
-                .setWaitForAccurateLocation(true)
                 .build();
     }
 
