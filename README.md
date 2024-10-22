@@ -1,4 +1,6 @@
+See how the Patrolling Support System works!
 
 
-https://github.com/user-attachments/assets/6e58f5de-c5f1-451d-91d5-358bf74a447d
+
+https://github.com/user-attachments/assets/0f830222-2c4b-4c4f-9239-6f5371e2654c
 
